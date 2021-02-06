@@ -1,7 +1,7 @@
 {
   "preset": "ts-jest",
   "testEnvironment": "node",
-  "verbose": true,
+  "verbose": false,
   "modulePaths": [
     "<rootDir>/src/"
   ],

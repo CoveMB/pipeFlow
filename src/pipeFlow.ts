@@ -1,8 +1,8 @@
 import { flow, pipe } from "fp-ts/lib/function";
 import * as R from "ramda";
 import { ErrorCallbackHandler } from "./types/error";
-import { tryCatchAsync } from "@bjmrq/utils";
-import { bodyNotReturned } from "./utils/guards-messages";
+import { readOnly, tryCatchAsync } from "@bjmrq/utils";
+import { boxNotReturned, logError } from "./utils/guards-messages";
 import {
   CreateBox,
   PipeFlow,
@@ -11,24 +11,37 @@ import {
   FlowBoxWithError,
 } from "./types";
 import enhancedErrors from "./utils/guards-reasons";
+import { defaultErrorCode } from "./utils/const";
 
 // @internal
 const createBox: CreateBox = (context) =>
   Object.seal({
-    state: {},
-    context,
+    state: undefined,
+    context: readOnly(context),
+    return: undefined,
     error: undefined,
   });
+
+// @internal
+const returnData = async (box: any) =>
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  flow(
+    R.ifElse(
+      flow(R.prop("error"), R.is(Object)),
+      R.prop("error"),
+      R.prop("return")
+    )
+  )(await box);
 
 // @internal
 const validateBoxState = (middleware: FlowMiddleware) =>
   R.unless(
     R.is(Object),
     flow(
-      R.tap(bodyNotReturned(middleware)),
+      R.tap(boxNotReturned(middleware)),
       R.always({
         error: {
-          code: 500,
+          code: defaultErrorCode,
         },
       })
     )
@@ -38,7 +51,12 @@ const validateBoxState = (middleware: FlowMiddleware) =>
 const notCatchedErrors = (middleware: FlowMiddleware) => (
   error: Error,
   errorBox: FlowBoxWithError
-) => pipe(errorBox, R.assoc("error", enhancedErrors(middleware)(error)));
+) =>
+  pipe(
+    errorBox,
+    R.assoc("error", enhancedErrors(middleware)(error)),
+    R.tap(logError)
+  );
 
 // @internal
 const errorOut: ErrorOut = (middleware) => async (box) =>
@@ -78,7 +96,8 @@ const pipeFlow: PipeFlow = (...middlewares) => (errorCallback = R.identity) =>
   flow(
     createBox,
     ...R.map(errorOut)(middlewares),
-    errorCallbackHandler(errorCallback)
+    errorCallbackHandler(errorCallback),
+    returnData
   );
 
 export { pipeFlow };

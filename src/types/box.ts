@@ -1,10 +1,10 @@
 import { FlowError } from "./error";
 
-export type FlowBox<M = any, Y = any> = {
-  context: M;
+export type FlowBox<M = any, Y = any, X = any> = {
+  context: Readonly<M>;
   state: Y;
+  return: X;
   error?: FlowError;
-  statusCode?: number;
 };
 
 export type FlowBoxWithError<

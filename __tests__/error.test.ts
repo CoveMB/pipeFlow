@@ -1,8 +1,10 @@
+import { defaultErrorCode } from "../src/utils/const";
 import { nonExposedError, notFoundError, pipeFlow, simpleError } from "../src";
 import { pipeContext } from "./fixtures/data";
+import { FlowError } from "../src/types/error";
 
-it("If an error occur during the flow it is returned in the error key", async () => {
-  const returnedFromFlow = await pipeFlow((box) => {
+it("If an error occur during the flow it is returned", async () => {
+  const returnedFromFlow = (await pipeFlow((box) => {
     try {
       throw new Error("Oups!");
 
@@ -12,13 +14,13 @@ it("If an error occur during the flow it is returned in the error key", async ()
     }
 
     return box;
-  })()(pipeContext);
+  })()(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(1);
+  expect(returnedFromFlow.code).toBe(defaultErrorCode);
 });
 
 it("If an exposed FlowError occur during the flow it returne it's message in the error's message and as exposed", async () => {
-  const returnedFromFlow = await pipeFlow((box) => {
+  const returnedFromFlow = (await pipeFlow((box) => {
     try {
       throw new Error("Not found");
 
@@ -28,15 +30,15 @@ it("If an exposed FlowError occur during the flow it returne it's message in the
     }
 
     return box;
-  })()(pipeContext);
+  })()(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(404);
-  expect(returnedFromFlow.error!.expose).toBe(true);
-  expect(returnedFromFlow.error!.message).toBe("Not found");
+  expect(returnedFromFlow.code).toBe(404);
+  expect(returnedFromFlow.expose).toBe(true);
+  expect(returnedFromFlow.message).toBe("Not found");
 });
 
 it("If an non exposed FlowError occur during the flow it does not return it's message with error and as non exposed", async () => {
-  const returnedFromFlow = await pipeFlow((box) => {
+  const returnedFromFlow = (await pipeFlow((box) => {
     try {
       throw new Error("Oups!");
 
@@ -46,71 +48,69 @@ it("If an non exposed FlowError occur during the flow it does not return it's me
     }
 
     return box;
-  })()(pipeContext);
+  })()(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(6);
-  expect(returnedFromFlow.error!.expose).toBe(false);
-  expect(returnedFromFlow.error!.message).toBe("Oups!");
+  expect(returnedFromFlow.code).toBe(6);
+  expect(returnedFromFlow.expose).toBe(false);
+  expect(returnedFromFlow.message).toBe("Oups!");
 });
 
 it("If an error occur and is not catch it is transform as a basic FlowError", async () => {
-  const returnedFromFlow = await pipeFlow((box) => {
-    box.state.number = 899;
+  const returnedFromFlow = (await pipeFlow((box) => {
+    box.state = { number: 899 };
 
     throw new Error("Oups !");
-  })()(pipeContext);
+  })()(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(1);
-  expect(returnedFromFlow.error!.message).toBe("Oups !");
+  expect(returnedFromFlow.code).toBe(defaultErrorCode);
+  expect(returnedFromFlow.message).toBe("Oups !");
 });
 
 it("If an error callback is supply it execute if an error occurres", async () => {
   let toMutate = "Not mutated";
 
-  const returnedFromFlow = await pipeFlow(() => {
+  const returnedFromFlow = (await pipeFlow(() => {
     throw new Error("Not found");
   })(() => {
     toMutate = "mutated";
-  })(pipeContext);
+  })(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(1);
+  expect(returnedFromFlow.code).toBe(defaultErrorCode);
   expect(toMutate).toBe("mutated");
 });
 
 it("If an error callback is supply it does not execute if no error occurres", async () => {
   let toMutate = "Not mutated";
 
-  const returnedFromFlow = await pipeFlow((box) => {
-    box.state.message = "Hello";
+  const returnedFromFlow = (await pipeFlow((box) => {
+    box.return = { message: "Hello" };
 
     return box;
   })(() => {
     toMutate = "mutated";
-  })(pipeContext);
+  })(pipeContext)) as FlowError;
 
   expect(returnedFromFlow.error).toBe(undefined);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  expect(returnedFromFlow.state.message).toBe("Hello");
+  expect(returnedFromFlow.message).toBe("Hello");
   expect(toMutate).toBe("Not mutated");
 });
 
 it("If an error callback is supply it should not modify the returned box", async () => {
-  const returnedFromFlow = await pipeFlow(() => {
+  const returnedFromFlow = (await pipeFlow(() => {
     throw new Error("Not found");
   })((box) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    box.state.message = "surprise";
+    box.state = { message: "surprise" };
 
     return box;
-  })(pipeContext);
+  })(pipeContext)) as FlowError;
 
-  expect(JSON.stringify(returnedFromFlow.state)).toBe(JSON.stringify({}));
+  expect(returnedFromFlow.message).toBe("Not found");
 });
 
 it("If an error occurres the other functions of the flow are not run", async () => {
   let toMutate = "Not mutated";
 
-  const returnedFromFlow = await pipeFlow(
+  const returnedFromFlow = (await pipeFlow(
     () => {
       throw new Error("Not found");
     },
@@ -119,16 +119,16 @@ it("If an error occurres the other functions of the flow are not run", async () 
 
       return box;
     }
-  )()(pipeContext);
+  )()(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(1);
+  expect(returnedFromFlow.code).toBe(defaultErrorCode);
   expect(toMutate).toBe("Not mutated");
 });
 
 it("If an error is attached to the box the other functions of the flow are not run", async () => {
   let toMutate = "Not mutated";
 
-  const returnedFromFlow = await pipeFlow(
+  const returnedFromFlow = (await pipeFlow(
     (box) => {
       box.error = notFoundError("Could not find this ressource");
 
@@ -139,19 +139,21 @@ it("If an error is attached to the box the other functions of the flow are not r
 
       return box;
     }
-  )()(pipeContext);
+  )()(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(404);
+  expect(returnedFromFlow.code).toBe(404);
   expect(toMutate).toBe("Not mutated");
 });
 
 it("If an error occur in an async function and is not catch it is transform as a basic FlowError", async () => {
-  const returnedFromFlow = await pipeFlow(async (box) => {
+  const returnedFromFlow = (await pipeFlow(async (box) => {
     await Promise.reject(new Error("Promise error"));
 
     return box;
-  })()(pipeContext);
+  })()(pipeContext)) as FlowError;
 
-  expect(returnedFromFlow.error!.code).toBe(1);
-  expect(returnedFromFlow.error!.message).toBe("Promise error");
+  console.log(returnedFromFlow);
+
+  expect(returnedFromFlow.code).toBe(defaultErrorCode);
+  expect(returnedFromFlow.message).toBe("Promise error");
 });

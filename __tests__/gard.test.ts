@@ -4,9 +4,9 @@ import { pipeFlow } from "../src";
 import { pipeContext } from "./fixtures/data";
 
 it("A middleware has to return a box", async () => {
-  const originalLog = console.log;
+  const originalLog = console.error;
 
-  console.log = jest.fn();
+  console.error = jest.fn();
 
   const wrongMiddleware = (box: FlowBox): void => {
     box.state = { number: 200 };
@@ -14,7 +14,7 @@ it("A middleware has to return a box", async () => {
 
   await pipeFlow(
     (box) => {
-      box.state.number = 200;
+      box.state = { number: 200 };
 
       return box;
     },
@@ -22,9 +22,9 @@ it("A middleware has to return a box", async () => {
     wrongMiddleware
   )()(pipeContext);
 
-  expect(console.log).toHaveBeenCalledWith(
+  expect(console.error).toHaveBeenCalledWith(
     `
-    Flow Error: Your middleware did not returned a box to be passed on to the next one, instead it returned: undefined
+    Flow Error: Your middleware did not returned a box to be passed on to the next one, instead it returned: ${undefined}
 
     This error has occurred in the following middleware:
 
@@ -32,13 +32,13 @@ it("A middleware has to return a box", async () => {
     `
   );
 
-  console.log = originalLog;
+  console.error = originalLog;
 });
 
 it("Only allowed key of box can be mutated", async () => {
-  const originalLog = console.log;
+  const originalLog = console.error;
 
-  console.log = jest.fn();
+  console.error = jest.fn();
 
   const wrongMiddleware = (box: FlowBox) => {
     box.state = { name: true };
@@ -50,7 +50,7 @@ it("Only allowed key of box can be mutated", async () => {
 
   await pipeFlow(wrongMiddleware)()(pipeContext);
 
-  expect(console.log).toHaveBeenCalledWith(
+  expect(console.error).toHaveBeenCalledWith(
     `
     Flow Error: Is seems you might be mutating the box, only the state property of the box is allowed to be extended, use it to pass data from one function to an other.
 
@@ -59,5 +59,5 @@ it("Only allowed key of box can be mutated", async () => {
     ${wrongMiddleware.toString()}
     `
   );
-  console.log = originalLog;
+  console.error = originalLog;
 });

@@ -1,5 +1,6 @@
 import { ErrorBuilder } from "../types/error";
 import * as R from "ramda";
+import { defaultErrorCode } from "../utils/const";
 
 /**
  * Help you build the error to be returned by your process, it is a curried function so you can pass it's parameter one at the time. This error should be attached to the error key of the box
@@ -8,9 +9,9 @@ import * as R from "ramda";
  * @param {string | Error} [message="Internal Error"] - the message or the error itself, if an error is passed it's message property will be used (default "Internal Error")
  * @returns {FlowError} The built flow error to attach to attach to the error key of the box
  */
-const errorBuilder: ErrorBuilder = (expose = false) => (code = 1) => (
-  message = "Internal Error"
-) => ({
+const errorBuilder: ErrorBuilder = (expose = false) => (
+  code = defaultErrorCode
+) => (message = "Internal Error") => ({
   expose,
   code,
   message: R.when(R.is(Error), R.prop("message"))(message) as string,

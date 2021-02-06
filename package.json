@@ -6,7 +6,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/BjMrq/Pipeline"
+    "url": "https://github.com/BjMrq/pipeFlow"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

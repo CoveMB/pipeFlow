@@ -1,7 +1,7 @@
-import { FlowMiddleware } from "../types";
+import { FlowBoxWithError, FlowMiddleware } from "../types";
 
-const bodyNotReturned = (middleware: FlowMiddleware) => (failedReturn: any) =>
-  console.log(
+const boxNotReturned = (middleware: FlowMiddleware) => (failedReturn: any) =>
+  console.error(
     `
     Flow Error: Your middleware did not returned a box to be passed on to the next one, instead it returned: ${failedReturn}
 
@@ -12,7 +12,7 @@ const bodyNotReturned = (middleware: FlowMiddleware) => (failedReturn: any) =>
   );
 
 const boxMutated = (middleware: FlowMiddleware) => () =>
-  console.log(
+  console.error(
     `
     Flow Error: Is seems you might be mutating the box, only the state property of the box is allowed to be extended, use it to pass data from one function to an other.
 
@@ -22,4 +22,7 @@ const boxMutated = (middleware: FlowMiddleware) => () =>
     `
   );
 
-export { bodyNotReturned, boxMutated };
+const logError = (errorBox: FlowBoxWithError) =>
+  console.error(errorBox.error.error);
+
+export { boxNotReturned, boxMutated, logError };
