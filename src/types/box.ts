@@ -13,3 +13,5 @@ export type FlowBoxWithError<
 > = M & {
   error: X;
 };
+
+export type NewState = Record<string, any>;

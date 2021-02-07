@@ -2,9 +2,11 @@ import { pipeFlow } from "../src";
 import { pipeContext, pipeState } from "./fixtures/data";
 
 it("Return undefined if nothing is attached to return key", async () => {
-  const returnedFromFlow = await pipeFlow<typeof pipeContext>((box) => box)()(
-    pipeContext
-  );
+  const returnedFromFlow = await pipeFlow<typeof pipeContext>((ignore) => {
+    const test = true;
+
+    return { key: "test", value: test };
+  })()(pipeContext);
 
   expect(returnedFromFlow).toBe(undefined);
 });
@@ -12,8 +14,6 @@ it("Return undefined if nothing is attached to return key", async () => {
 it("Return what is attached to return key", async () => {
   const returnedFromFlow = await pipeFlow<typeof pipeContext>((box) => {
     box.return = "surprise";
-
-    return box;
   })()(pipeContext);
 
   expect(returnedFromFlow).toBe("surprise");
@@ -21,20 +21,35 @@ it("Return what is attached to return key", async () => {
 
 it("Add data to the state", async () => {
   const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof pipeState>(
-    (box) => box,
+    (ignore) => pipeState,
     (box) => {
-      box.state = pipeState;
-
-      return box;
-    },
-    (box) => {
-      box.return = pipeState;
-
-      return box;
+      box.return = { ...box.state };
     }
   )()(pipeContext);
 
   expect(JSON.stringify(returnedFromFlow)).toBe(JSON.stringify(pipeState));
+});
+
+it("Merged data added to the state", async () => {
+  const oldValue = { oldValue: true };
+  const newValue = { newValue: true };
+
+  type allValues = typeof oldValue & typeof newValue;
+
+  const returnedFromFlow = await pipeFlow<
+    typeof pipeContext,
+    allValues,
+    allValues
+  >(
+    () => oldValue,
+    () => newValue,
+    (box) => {
+      box.return = { ...box.state };
+    }
+  )()(pipeContext);
+
+  expect(returnedFromFlow.oldValue).toBe(true);
+  expect(returnedFromFlow.newValue).toBe(true);
 });
 
 it("Should return return from box", async () => {
@@ -43,14 +58,8 @@ it("Should return return from box", async () => {
   const returnedFromFlow = await pipeFlow(
     (box) => {
       box.return = bodyToReturn;
-
-      return box;
     },
-    (box) => {
-      box.state = { data: "something" };
-
-      return box;
-    }
+    (ignore) => ({ data: "something" })
   )()(pipeContext);
 
   expect(JSON.stringify(returnedFromFlow)).toBe(JSON.stringify(bodyToReturn));

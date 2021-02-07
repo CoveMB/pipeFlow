@@ -1,5 +1,5 @@
 import { defaultErrorCode } from "../src/utils/const";
-import { nonExposedError, notFoundError, pipeFlow, simpleError } from "../src";
+import { errorBuilder, notFoundError, pipeFlow, simpleError } from "../src";
 import { pipeContext } from "./fixtures/data";
 import { FlowError } from "../src/types/error";
 
@@ -7,8 +7,6 @@ it("If an error occur during the flow it is returned", async () => {
   const returnedFromFlow = (await pipeFlow((box) => {
     try {
       throw new Error("Oups!");
-
-      return box;
     } catch (error) {
       box.error = simpleError(error);
     }
@@ -19,12 +17,10 @@ it("If an error occur during the flow it is returned", async () => {
   expect(returnedFromFlow.code).toBe(defaultErrorCode);
 });
 
-it("If an exposed FlowError occur during the flow it returne it's message in the error's message and as exposed", async () => {
+it("If an exposed FlowError occur during the flow it return it's message in the error's message and as exposed", async () => {
   const returnedFromFlow = (await pipeFlow((box) => {
     try {
       throw new Error("Not found");
-
-      return box;
     } catch (error) {
       box.error = notFoundError((error as Error).message);
     }
@@ -33,7 +29,6 @@ it("If an exposed FlowError occur during the flow it returne it's message in the
   })()(pipeContext)) as FlowError;
 
   expect(returnedFromFlow.code).toBe(404);
-  expect(returnedFromFlow.expose).toBe(true);
   expect(returnedFromFlow.message).toBe("Not found");
 });
 
@@ -41,17 +36,14 @@ it("If an non exposed FlowError occur during the flow it does not return it's me
   const returnedFromFlow = (await pipeFlow((box) => {
     try {
       throw new Error("Oups!");
-
-      return box;
     } catch (error) {
-      box.error = nonExposedError(6)(error);
+      box.error = errorBuilder(6)(error);
     }
 
     return box;
   })()(pipeContext)) as FlowError;
 
   expect(returnedFromFlow.code).toBe(6);
-  expect(returnedFromFlow.expose).toBe(false);
   expect(returnedFromFlow.message).toBe("Oups!");
 });
 
@@ -84,8 +76,6 @@ it("If an error callback is supply it does not execute if no error occurres", as
 
   const returnedFromFlow = (await pipeFlow((box) => {
     box.return = { message: "Hello" };
-
-    return box;
   })(() => {
     toMutate = "mutated";
   })(pipeContext)) as FlowError;
@@ -100,8 +90,6 @@ it("If an error callback is supply it should not modify the returned box", async
     throw new Error("Not found");
   })((box) => {
     box.state = { message: "surprise" };
-
-    return box;
   })(pipeContext)) as FlowError;
 
   expect(returnedFromFlow.message).toBe("Not found");
@@ -152,8 +140,21 @@ it("If an error occur in an async function and is not catch it is transform as a
     return box;
   })()(pipeContext)) as FlowError;
 
-  console.log(returnedFromFlow);
-
   expect(returnedFromFlow.code).toBe(defaultErrorCode);
   expect(returnedFromFlow.message).toBe("Promise error");
+});
+
+it("If an a flow error is attached to the box, it return the error and no other entries", async () => {
+  const returnedFromFlow = (await pipeFlow((box) => {
+    box.error = notFoundError("Not Found");
+
+    const toReturn = { fakeData: true };
+
+    box.return = toReturn;
+
+    return toReturn;
+  })()(pipeContext)) as FlowError;
+
+  expect(returnedFromFlow.code).toBe(404);
+  expect(returnedFromFlow.message).toBe("Not Found");
 });

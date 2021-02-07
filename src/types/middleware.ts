@@ -1,15 +1,21 @@
-import { FlowBox } from "./box";
+import { FlowBox, NewState } from "./box";
 
-export type FlowAsyncMiddleware<M> = (box: M) => Promise<M>;
-
-export type FlowSyncMiddleware<M> = (box: M) => M;
-
-export type FlowErrorSyncMiddleware<M> = (box: M) => M | Error;
-
-export type FlowErrorAsyncMiddleware<M> = (
+export type FlowAsyncMiddleware<M extends FlowBox = FlowBox> = (
   box: M
-) => Promise<M> | Promise<Error>;
+) => Promise<void> | Promise<NewState>;
+
+export type FlowSyncMiddleware<M extends FlowBox = FlowBox> = (
+  box: M
+) => void | NewState;
+
+export type FlowErrorSyncMiddleware<M extends FlowBox = FlowBox> = (
+  box: M
+) => void | NewState | Error;
+
+export type FlowErrorAsyncMiddleware<M extends FlowBox = FlowBox> = (
+  box: M
+) => Promise<void> | Promise<NewState> | Promise<Error>;
 
 export type FlowMiddleware<M extends FlowBox = FlowBox> =
-  | FlowSyncMiddleware<M>
-  | FlowAsyncMiddleware<M>;
+  | FlowAsyncMiddleware<M>
+  | FlowSyncMiddleware<M>;

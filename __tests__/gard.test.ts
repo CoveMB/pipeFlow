@@ -3,38 +3,6 @@ import { FlowBox } from "../src/types";
 import { pipeFlow } from "../src";
 import { pipeContext } from "./fixtures/data";
 
-it("A middleware has to return a box", async () => {
-  const originalLog = console.error;
-
-  console.error = jest.fn();
-
-  const wrongMiddleware = (box: FlowBox): void => {
-    box.state = { number: 200 };
-  };
-
-  await pipeFlow(
-    (box) => {
-      box.state = { number: 200 };
-
-      return box;
-    },
-    // @ts-expect-error
-    wrongMiddleware
-  )()(pipeContext);
-
-  expect(console.error).toHaveBeenCalledWith(
-    `
-    Flow Error: Your middleware did not returned a box to be passed on to the next one, instead it returned: ${undefined}
-
-    This error has occurred in the following middleware:
-
-    ${wrongMiddleware.toString()}
-    `
-  );
-
-  console.error = originalLog;
-});
-
 it("Only allowed key of box can be mutated", async () => {
   const originalLog = console.error;
 
