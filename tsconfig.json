@@ -18,17 +18,10 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "stripInternal": true,
-    // "skipLibCheck": false,
-    // "esModuleInterop": false,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "baseUrl": ".",
-    // "paths": {
-    //   "*": [
-    //     "./src/*"
-    //   ]
-    // },
     "typeRoots": [
       "src/types/*",
       "node_modules/@types"
