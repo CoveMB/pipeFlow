@@ -5,8 +5,11 @@
 This is a little utility to process data in a pipe of functions using node.js runtime.
 
 Your pipeline will flow a "box" containing the data you'll need and want to return thought your functions.
+
 Your pipe will receive some data that will be attached to the box as a context, this data will be immutable. 
+
 The "box" also contain a mutable state entry. Anything you return from any of your function will be attached to this state.
+
 In the "box" their is also a return entry so you can control what you wish to return at the end of your pipe.
 
 You will also find some little helpers to help you with error handling.
@@ -29,10 +32,14 @@ const handler = pipeFlow(
     const message = box.context.message // access the context
     box.return = message //control what you want to return
   }
-)();
+)();// This is for optional error handler
 
 const result = handler({ message: "Hello world" }) // create context from data
 console.log(result) // "Hello world"
+```
+Arity:
+```js
+pipeFlow(...functions, errorHandler, dataToTransformAsContext)
 ```
 
 ## How It Works
