@@ -1,4 +1,6 @@
 # PipeFlow
+**THIS IS A WORK IN PROGRESS**
+
 ### A little utility to process data in a pipe
 
 
