@@ -1,18 +1,18 @@
+import { readOnly, tryCatchAsync } from "@bjmrq/utils";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as R from "ramda";
-import { ErrorCallbackHandler } from "./types/error";
-import { readOnly, tryCatchAsync } from "@bjmrq/utils";
-import { logError } from "./utils/guards-messages";
 import {
   CreateContext,
-  PipeFlow,
   ErrorOut,
-  FlowMiddleware,
-  FlowContextWithError,
   FlowContext,
-  NewState,
+  FlowContextWithError,
+  FlowMiddleware,
+  PipeFlow,
   SubFlow,
+  ToState,
 } from "./types";
+import { ErrorCallbackHandler } from "./types/error";
+import { logError } from "./utils/guards-messages";
 import enhancedErrors from "./utils/guards-reasons";
 
 // @internal
@@ -42,7 +42,7 @@ const updateContextState = (middleware: FlowMiddleware) => async (
   R.assoc(
     "state",
     // eslint-disable-next-line @typescript-eslint/await-thenable
-    R.merge(context.state, (await middleware(context)) as NewState),
+    R.merge(context.state, (await middleware(context)) as ToState),
     context
   );
 

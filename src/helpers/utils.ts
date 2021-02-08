@@ -1,10 +1,16 @@
-import { FlowContext, FlowSyncMiddleware } from "../types";
 import * as R from "ramda";
+import { FlowContext, FlowSyncMiddleware } from "../types";
 
 /**
  * Log the context object without stopping process of the flow
  */
-const debugFlow: FlowSyncMiddleware = (context) => console.log(context);
+const debugFlow: (path?: string | string[]) => FlowSyncMiddleware = (path?) => (
+  context
+) =>
+  console.debug(
+    // @ts-ignore
+    path ? R.path(...(Array.isArray(path) ? path : [path]), context) : context
+  );
 
 /**
  * Little helper to merge some data in the actual state property

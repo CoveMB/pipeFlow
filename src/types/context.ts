@@ -14,4 +14,4 @@ export type FlowContextWithError<
   error: X;
 };
 
-export type NewState = Record<string, any>;
+export type ToState = Record<string, any>;
