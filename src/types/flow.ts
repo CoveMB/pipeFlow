@@ -3,11 +3,11 @@ import { ErrorCallback } from "./error";
 import { FlowMiddleware } from "./middleware";
 
 export type SubFlow = <M = unknown, Y = unknown>(
-  ...middlewares: Array<FlowMiddleware<FlowContext<M, Partial<Y>>>>
-) => FlowMiddleware<FlowContext<M, Partial<Y>>>;
+  ...middlewares: Array<FlowMiddleware<FlowContext<M, Y>>>
+) => FlowMiddleware<FlowContext<M, Y>>;
 
 export type PipeFlow = <M = unknown, Y = unknown, X = unknown>(
-  ...middlewares: Array<FlowMiddleware<FlowContext<M, Partial<Y>>>>
+  ...middlewares: Array<FlowMiddleware<FlowContext<M, Y>>>
 ) => (
   errorCallback?: ErrorCallback<FlowContext<M, Y>>
 ) => (
