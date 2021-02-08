@@ -8,8 +8,8 @@ const debugFlow: (path?: string | string[]) => FlowSyncMiddleware = (path?) => (
   context
 ) =>
   console.debug(
-    // @ts-ignore
-    path ? R.path(...(Array.isArray(path) ? path : [path]), context) : context
+    // eslint-disable-next-line array-func/prefer-array-from
+    path ? R.path([...(Array.isArray(path) ? path : [path])], context) : context
   );
 
 /**
