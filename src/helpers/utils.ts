@@ -1,5 +1,6 @@
 import * as R from "ramda";
-import { FlowContext, FlowSyncMiddleware } from "../types";
+import { FlowSyncMiddleware } from "../types";
+import { addToProperty } from "../utils/context";
 
 /**
  * Log the context object without stopping process of the flow
@@ -15,21 +16,11 @@ const debugFlow: (path?: string | string[]) => FlowSyncMiddleware = (path?) => (
 /**
  * Little helper to merge some data in the actual state property
  */
-const addToReturn = R.curry(
-  <M extends Record<any, any> = Record<any, any>>(
-    toReturn: M,
-    context: FlowContext
-  ): FlowContext["return"] & M => R.merge(toReturn, context.return)
-);
+const addToReturn = addToProperty("return");
 
 /**
  * Little helper to merge some data in the actual return property
  */
-const addToState = R.curry(
-  <M extends Record<any, any> = Record<any, any>>(
-    toState: M,
-    context: FlowContext
-  ): FlowContext["state"] & M => R.merge(toState, context.state)
-);
+const addToState = addToProperty("state");
 
 export { debugFlow, addToReturn, addToState };
