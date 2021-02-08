@@ -6,13 +6,13 @@
 
 This is a little utility to process data in a pipe of functions using node.js runtime.
 
-Your pipeline will flow a "box" containing the data you'll need and want to return thought your functions.
+Your pipeline will flow a "context" containing the data you'll need and want to return thought your functions.
 
-Your pipe will receive some data that will be attached to the box as a context, this data will be immutable. 
+Your pipe will receive some data that will be attached to the "context" as an input, this data will be immutable. 
 
-The "box" also contain a mutable state entry. Anything you return from any of your function will be attached to this state.
+The "context" also contain a mutable state entry. Anything you return from any of your function will be attached to this state.
 
-In the "box" their is also a return entry so you can control what you wish to return at the end of your pipe.
+In the "context" their is also a return entry so you can control what you wish to return at the end of your pipe.
 
 You will also find some little helpers to help you with error handling.
 
@@ -30,9 +30,9 @@ yarn add @bjmrq/pipe-flow
 Javascript:
 ```js
 const handler = pipeFlow(
-  (box) => {
-    const message = box.context.message // access the context
-    box.return = message //control what you want to return
+  (context) => {
+    const message = context.input.message // access the context
+    context.return = message //control what you want to return
   }
 )();// This is for optional error handler
 
@@ -52,13 +52,13 @@ Those function can either be sync or async functions.
 
 ```js
 const handler = pipeFlow(
-  (box) => {
-    console.log(box.context) // {id: 9}
+  (context) => {
+    console.log(context.input) // {id: 9}
 
     return { status: "ok" } // Attach data to the state
   },
-  async (box) => {
-    console.log(box.state.status) // "ok"
+  async (context) => {
+    console.log(context.state.status) // "ok"
   }
 )();
 
@@ -68,20 +68,20 @@ handler({ id: 9 });
 
 ### Move Data Around
 
-If you want to move some data from one function to an other simply return it in an object. Any object you return from one of your function will be merge in the state key of the "box".
+If you want to move some data from one function to an other simply return it in an object. Any object you return from one of your function will be merge in the state key of the "context".
 
 ```js
 const handler = pipeFlow(
-  async (box) => {
+  async (context) => {
     const product = await database("products").where(
       "id",
-      box.context.productId // Access data from context
+      context.input.productId // Access data from context
     );
 
     return { product }; // Attach data to the state
   },
-  async (box) => {
-    const productName = box.product.name // Access data from tate
+  async (context) => {
+    const productName = context.state.product.name // Access data from tate
 
     console.log(productName) // "A great product indeed"
   }
@@ -89,9 +89,9 @@ const handler = pipeFlow(
 
 handler({ productId: 9 });
 ```
-#### Those are the keys accessible inside the box:
+#### Those are the keys accessible inside the context:
 
-- **context**: is the immutable context you gave as last argument to your *pipeFlow*
+- **input**: is the immutable input you gave as last argument to your *pipeFlow*
 - **state**: is a mutable key that you can use to pass data from one function to another
 - **return**: is the data that will be returned from your *pipeFlow*
 - **error**: you can attach an error to the error key, doing so will bypass other functions of the flow, only the error handler will be trigger, you can control wether you want to expose this error or not
@@ -99,21 +99,21 @@ handler({ productId: 9 });
 
 ### Control What is Returned
 
-You need to attach any data you wish to **return** to the return key of the box, other keys will never be returned.
+You need to attach any data you wish to **return** to the return key of the "context", other keys will never be returned.
 If an error has happened during the flow it will be returned instead.
 
 ```js
 const handler = pipeFlow(
-  async (box) => {
+  async (context) => {
     const product = await database("products").where(
       "id",
-      box.context.productId // Access data from context
+      context.input.productId // Access data from context
     );
 
     return { product }; // Attach data to the state
   },
-  async (box) => {
-    box.return = box.state.product // Control data to return
+  async (context) => {
+    context.return = context.state.product // Control data to return
   }
 )();
 
@@ -124,22 +124,22 @@ console.log(result) // { id: 9, name: "A great product indeed", type: "product",
 ## Error Handling
 
 ### How it Works
-If you want to control what is return from your *flowPipe* depending of different errors that might happen you need to attach the error to the error key of the "box". 
+If you want to control what is return from your *flowPipe* depending of different errors that might happen you need to attach the error to the error key of the "context". 
 This will skip the execution of all other functions in your flow.
-*The error should be attach to the box and not throw, to control the flow in your application.*
-But if you forget to catch an error it will be attach to the box as well and returned as
+*The error should be attach to the "context" and not throw, to control the flow in your application.*
+But if you forget to catch an error it will be attach to the "context" as well and returned as
 
 ```js
 const handler = pipeFlow(
-  async (box) => {
+  async (context) => {
     const product = await database("products").where(
       "id",
-      box.context.productId // Access data from context
+      context.input.productId // Access data from context
     );
 
     if(!product) {
 
-      box.error = { // Attache the error on the box
+      context.error = { // Attache the error on the "context"
         code: 404,
         message: "Product Not Found"
       };
@@ -149,15 +149,15 @@ const handler = pipeFlow(
     return { product }; // Attach data to the state
   },
   // If an error has been attach in the previous function this one will not run
-  async (box) => {
+  async (context) => {
     const updatedProduct = await database("product").where(
       "id",
-      box.state.product.id
+      context.state.product.id
     ).update(
       { sold: true}
     );
 
-    box.return = updatedProduct;
+    context.return = updatedProduct;
   }
 )();
 ```
@@ -171,7 +171,7 @@ This will result the following error
 }
 ```
 
-- The type of an error to attach to the error key of the box should looks like this:
+- The type of an error to attach to the error key of the "context" should looks like this:
 - **code**: the error code
 - **message**: the error message
 - **error**: the error itself created from the message, will include stacktrace
@@ -195,7 +195,7 @@ type FlowError = {
 ```
 
 ### Error Helpers
-You can use little error helper to format the errors attached to the box.
+You can use little error helper to format the errors attached to the "context".
 
 - **errorBuilder**: the error builder will help you build the error to be returned to the user, it is a curried function so you can pass it's parameter one at the time. 
 - code (default to 1): the error code
@@ -203,7 +203,7 @@ You can use little error helper to format the errors attached to the box.
 
 example 1:
 ```js
-box.error = errorBuilder()()
+context.error = errorBuilder()()
 ```
 Will return 
 ```
@@ -215,9 +215,9 @@ Will return
 ```
 example 2:
 ```js
-box.error = errorBuilder(9)(new Error("Could not process arguments"))
+context.error = errorBuilder(9)(new Error("Could not process arguments"))
 // Same as
-box.error = errorBuilder(9)("Could not process arguments")
+context.error = errorBuilder(9)("Could not process arguments")
 ```
 Will return 
 ```
@@ -242,14 +242,14 @@ const notAuthorizedError = errorBuilder(403); // Import
 ```js
 const { notAuthorizedError } = require("@bjmrq/pipe-flow")
 exports.handler = pipeFlow(
-  (box) => {
-    const authorizationToken = box.context.token;
+  (context) => {
+    const authorizationToken = context.input.token;
 
     if (!authorizationToken) {
-      box.error = notAuthorizedError("You can't do that");
+      context.error = notAuthorizedError("You can't do that");
     }
 
-    return { isAuthenticated: true }; // Only taken in consideration if no error was attached to the box
+    return { isAuthenticated: true }; // Only taken in consideration if no error was attached to the "context"
   },
 )();
 ```
@@ -258,34 +258,34 @@ exports.handler = pipeFlow(
 If you wish to have extra logic triggered when an error occurres (send log to remote place, call a cloud service..) you can provide ```pipeFlow``` with an extra function.
 ```js
 exports.handler = pipeFlow(
-  async (box) => {
+  async (context) => {
 
     const product = await database("product").where(
       "id",
-      box.state.productId
+      context.state.productId
     );
 
     if (!product) {
-      box.error = notFoundError(new Error("Could not find this product"));
+      context.error = notFoundError(new Error("Could not find this product"));
     }
     
-    box.return = product
+    context.return = product
 // Extra error handler
-)((box) => {
-  sendLogs(box.error)
+)((context) => {
+  sendLogs(context.error)
 });
 ```
-- In the error handler you will have access to the whole box that caused the error with it's state and the error itself
-- The box in the error handler is a copy of the box that will be return, mutating it will not change the returned value
+- In the error handler you will have access to the whole "context" that caused the error with it's state and the error itself
+- The "context" in the error handler is a copy of the "context" that will be return, mutating it will not change the returned value
 
-## The Flow and it's Box Recap
+## The Flow and it's Context Recap
 
-A *flow* is similar to a pipe function in functional programming, you can combine your functions from left to right, and the *"box"* will flow thought them, what you return from those functions will be attach to the state of the "box" so it can be passed on to the next function of the flow.
-Anything you wish to return can be attached to the return entry of the "box".
+A *flow* is similar to a pipe function in functional programming, you can combine your functions from left to right, and the *"context"* will flow thought them, what you return from those functions will be attach to the state of the "context" so it can be passed on to the next function of the flow.
+Anything you wish to return can be attached to the return entry of the "context".
 
-Those are the keys accessible inside the box
+Those are the keys accessible inside the "context"
 
-- **context**: is the context data you passed to you pipe, it is immutable
+- **input**: is the context data you passed to you pipe, it is immutable
 - **state**: is a mutable key that you can use to pass data from one function to another
 - **error**: you can attach an error to the error key, doing so will bypass other functions of the flow, only the error handler will be trigger. (will be returned from your pipe if any)
 - **return**: what will be returned from your pipe
@@ -297,6 +297,6 @@ Those are the keys accessible inside the box
 
 You will find different types available
 ```ts
-type FlowBox
+type FlowContext
 type FlowMiddleware
 ```

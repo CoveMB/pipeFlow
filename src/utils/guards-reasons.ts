@@ -2,7 +2,7 @@ import { flow } from "fp-ts/lib/function";
 import * as R from "ramda";
 import { FlowMiddleware } from "../types";
 import { simpleError } from "../helpers/helpers-error";
-import { boxMutated } from "./guards-messages";
+import { contextMutated } from "./guards-messages";
 
 const enhancedErrors = (middleware: FlowMiddleware) =>
   R.ifElse(
@@ -11,7 +11,7 @@ const enhancedErrors = (middleware: FlowMiddleware) =>
       R.prop("message"),
       R.includes("object is not extensible")
     ),
-    flow(R.tap(boxMutated(middleware)), simpleError),
+    flow(R.tap(contextMutated(middleware)), simpleError),
     simpleError
   );
 

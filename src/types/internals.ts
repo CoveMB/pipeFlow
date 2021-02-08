@@ -1,4 +1,4 @@
-import { FlowBox } from "./box";
+import { FlowContext } from "./context";
 
 // @internal
-export type CreateBox = <M>(context: M) => Partial<FlowBox<M>>;
+export type CreateContext = <M>(context: M) => Partial<FlowContext<M>>;

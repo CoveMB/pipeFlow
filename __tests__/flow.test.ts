@@ -12,8 +12,8 @@ it("Return undefined if nothing is attached to return key", async () => {
 });
 
 it("Return what is attached to return key", async () => {
-  const returnedFromFlow = await pipeFlow<typeof pipeContext>((box) => {
-    box.return = "surprise";
+  const returnedFromFlow = await pipeFlow<typeof pipeContext>((context) => {
+    context.return = "surprise";
   })()(pipeContext);
 
   expect(returnedFromFlow).toBe("surprise");
@@ -22,8 +22,8 @@ it("Return what is attached to return key", async () => {
 it("Add data to the state", async () => {
   const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof pipeState>(
     (ignore) => pipeState,
-    (box) => {
-      box.return = { ...box.state };
+    (context) => {
+      context.return = { ...context.state };
     }
   )()(pipeContext);
 
@@ -43,8 +43,8 @@ it("Merged data added to the state", async () => {
   >(
     () => oldValue,
     () => newValue,
-    (box) => {
-      box.return = { ...box.state };
+    (context) => {
+      context.return = { ...context.state };
     }
   )()(pipeContext);
 
@@ -52,12 +52,12 @@ it("Merged data added to the state", async () => {
   expect(returnedFromFlow.newValue).toBe(true);
 });
 
-it("Should return return from box", async () => {
+it("Should return return from context", async () => {
   const bodyToReturn = { test: "bip", success: true };
 
   const returnedFromFlow = await pipeFlow(
-    (box) => {
-      box.return = bodyToReturn;
+    (context) => {
+      context.return = bodyToReturn;
     },
     (ignore) => ({ data: "something" })
   )()(pipeContext);

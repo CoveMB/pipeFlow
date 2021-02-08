@@ -1,4 +1,4 @@
-import { FlowBox, FlowBoxWithError } from "./box";
+import { FlowContext, FlowContextWithError } from "./context";
 
 export type FlowError = {
   code: number;
@@ -11,11 +11,11 @@ export type ErrorBuilder = (
 ) => (message?: string | Error) => FlowError;
 
 export type ErrorCallback<
-  M extends FlowBox = FlowBox,
+  M extends FlowContext = FlowContext,
   X extends FlowError = FlowError
-> = (box: FlowBoxWithError<M, X>) => void;
+> = (context: FlowContextWithError<M, X>) => void;
 
 // @internal
 export type ErrorCallbackHandler = (
   errorCallback: ErrorCallback
-) => (box: Promise<FlowBox>) => Promise<FlowBox>;
+) => (context: Promise<FlowContext>) => Promise<FlowContext>;

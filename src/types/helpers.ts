@@ -1,4 +1,4 @@
-import { FlowBox } from "./box";
+import { FlowContext } from "./context";
 import { FlowMiddleware } from "./middleware";
 
 // // Middleware helpers
@@ -7,9 +7,9 @@ import { FlowMiddleware } from "./middleware";
 //   M extends FlowSyncMiddleware<M> | FlowAsyncMiddleware<M>
 // >(
 //   middleware: M
-// ) => (box: Promise<FlowBox<M>>) => Promise<FlowBox<M>>;
+// ) => (context: Promise<FlowContext<M>>) => Promise<FlowContext<M>>;
 
 // @internal
 export type ErrorOut = <M extends FlowMiddleware>(
   middleware: M
-) => (box: Promise<FlowBox>) => Promise<FlowBox>;
+) => (context: Promise<FlowContext>) => Promise<FlowContext>;

@@ -1,9 +1,9 @@
-import { FlowBoxWithError, FlowMiddleware } from "../types";
+import { FlowContextWithError, FlowMiddleware } from "../types";
 
-const boxNotReturned = (middleware: FlowMiddleware) => (failedReturn: any) =>
+const contextMutated = (middleware: FlowMiddleware) => () =>
   console.error(
     `
-    Flow Error: Your middleware did not returned a box to be passed on to the next one, instead it returned: ${failedReturn}
+    Flow Error: Is seems you might be mutating the "context", only the state and return property of the "context" are allowed to be extended, use the state property to pass data from one function to an other, and return to control what you want to return.
 
     This error has occurred in the following middleware:
 
@@ -11,18 +11,7 @@ const boxNotReturned = (middleware: FlowMiddleware) => (failedReturn: any) =>
     `
   );
 
-const boxMutated = (middleware: FlowMiddleware) => () =>
-  console.error(
-    `
-    Flow Error: Is seems you might be mutating the box, only the state property of the box is allowed to be extended, use it to pass data from one function to an other.
+const logError = (errorContext: FlowContextWithError) =>
+  console.error(errorContext.error.error);
 
-    This error has occurred in the following middleware:
-
-    ${middleware.toString()}
-    `
-  );
-
-const logError = (errorBox: FlowBoxWithError) =>
-  console.error(errorBox.error.error);
-
-export { boxNotReturned, boxMutated, logError };
+export { contextMutated, logError };
