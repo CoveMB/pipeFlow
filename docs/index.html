@@ -61,14 +61,15 @@
 				<a href="#pipeflow" id="pipeflow" style="color: inherit; text-decoration: none;">
 					<h1>PipeFlow</h1>
 				</a>
+				<p><strong>THIS IS A WORK IN PROGRESS</strong></p>
 				<a href="#a-little-utility-to-process-data-in-a-pipe" id="a-little-utility-to-process-data-in-a-pipe" style="color: inherit; text-decoration: none;">
 					<h3>A little utility to process data in a pipe</h3>
 				</a>
 				<p>This is a little utility to process data in a pipe of functions using node.js runtime.</p>
-				<p>Your pipeline will flow a &quot;box&quot; containing the data you&#39;ll need and want to return thought your functions.
-					Your pipe will receive some data that will be attached to the box as a context, this data will be immutable.
-					The &quot;box&quot; also contain a mutable state entry. Anything you return from any of your function will be attached to this state.
-				In the &quot;box&quot; their is also a return entry so you can control what you wish to return at the end of your pipe.</p>
+				<p>Your pipeline will flow a &quot;context&quot; containing the data you&#39;ll need and want to return thought your functions.</p>
+				<p>Your pipe will receive some data that will be attached to the &quot;context&quot; as an input, this data will be immutable. </p>
+				<p>The &quot;context&quot; also contain a mutable state entry. Anything you return from any of your function will be attached to this state.</p>
+				<p>In the &quot;context&quot; their is also a return entry so you can control what you wish to return at the end of your pipe.</p>
 				<p>You will also find some little helpers to help you with error handling.</p>
 				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
 					<h2>Installation</h2>
@@ -84,14 +85,17 @@
 				</a>
 				<p>Javascript:</p>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">handler</span><span style="color: #000000"> = </span><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(</span>
-<span style="color: #000000">  (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
-<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">message</span><span style="color: #000000"> = </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">message</span><span style="color: #000000"> </span><span style="color: #008000">// access the context</span>
-<span style="color: #000000">    </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">message</span><span style="color: #000000"> </span><span style="color: #008000">//control what you want to return</span>
+<span style="color: #000000">  (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">message</span><span style="color: #000000"> = </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">input</span><span style="color: #000000">.</span><span style="color: #001080">message</span><span style="color: #000000"> </span><span style="color: #008000">// access the context</span>
+<span style="color: #000000">    </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">message</span><span style="color: #000000"> </span><span style="color: #008000">//control what you want to return</span>
 <span style="color: #000000">  }</span>
-<span style="color: #000000">)();</span>
+<span style="color: #000000">)();</span><span style="color: #008000">// This is for optional error handler</span>
 
 <span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">result</span><span style="color: #000000"> = </span><span style="color: #795E26">handler</span><span style="color: #000000">({ </span><span style="color: #001080">message:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;Hello world&quot;</span><span style="color: #000000"> }) </span><span style="color: #008000">// create context from data</span>
 <span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">result</span><span style="color: #000000">) </span><span style="color: #008000">// &quot;Hello world&quot;</span>
+</code></pre>
+				<p>Arity:</p>
+				<pre><code class="language-js"><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(...</span><span style="color: #001080">functions</span><span style="color: #000000">, </span><span style="color: #001080">errorHandler</span><span style="color: #000000">, </span><span style="color: #001080">dataToTransformAsContext</span><span style="color: #000000">)</span>
 </code></pre>
 				<a href="#how-it-works" id="how-it-works" style="color: inherit; text-decoration: none;">
 					<h2>How It Works</h2>
@@ -102,13 +106,13 @@
 				<p>You can create a flow made of multiple functions that will execute one after an other from left to right, similar to a <em>pipe</em> function.
 				Those function can either be sync or async functions.</p>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">handler</span><span style="color: #000000"> = </span><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(</span>
-<span style="color: #000000">  (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
-<span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #008000">// {id: 9}</span>
+<span style="color: #000000">  (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">input</span><span style="color: #000000">) </span><span style="color: #008000">// {id: 9}</span>
 
 <span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000"> { </span><span style="color: #001080">status:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;ok&quot;</span><span style="color: #000000"> } </span><span style="color: #008000">// Attach data to the state</span>
 <span style="color: #000000">  },</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
-<span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">status</span><span style="color: #000000">) </span><span style="color: #008000">// &quot;ok&quot;</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">status</span><span style="color: #000000">) </span><span style="color: #008000">// &quot;ok&quot;</span>
 <span style="color: #000000">  }</span>
 <span style="color: #000000">)();</span>
 
@@ -117,18 +121,18 @@
 				<a href="#move-data-around" id="move-data-around" style="color: inherit; text-decoration: none;">
 					<h3>Move Data Around</h3>
 				</a>
-				<p>If you want to move some data from one function to an other simply return it in an object. Any object you return from one of your function will be merge in the state key of the &quot;box&quot;.</p>
+				<p>If you want to move some data from one function to an other simply return it in an object. Any object you return from one of your function will be merge in the state key of the &quot;context&quot;.</p>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">handler</span><span style="color: #000000"> = </span><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">product</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">database</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;products&quot;</span><span style="color: #000000">).</span><span style="color: #795E26">where</span><span style="color: #000000">(</span>
 <span style="color: #000000">      </span><span style="color: #A31515">&quot;id&quot;</span><span style="color: #000000">,</span>
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">productId</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from context</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">input</span><span style="color: #000000">.</span><span style="color: #001080">productId</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from context</span>
 <span style="color: #000000">    );</span>
 
 <span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000"> { </span><span style="color: #001080">product</span><span style="color: #000000"> }; </span><span style="color: #008000">// Attach data to the state</span>
 <span style="color: #000000">  },</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
-<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">productName</span><span style="color: #000000"> = </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">product</span><span style="color: #000000">.</span><span style="color: #001080">name</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from tate</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">productName</span><span style="color: #000000"> = </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">product</span><span style="color: #000000">.</span><span style="color: #001080">name</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from tate</span>
 
 <span style="color: #000000">    </span><span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">log</span><span style="color: #000000">(</span><span style="color: #001080">productName</span><span style="color: #000000">) </span><span style="color: #008000">// &quot;A great product indeed&quot;</span>
 <span style="color: #000000">  }</span>
@@ -136,11 +140,11 @@
 
 <span style="color: #795E26">handler</span><span style="color: #000000">({ </span><span style="color: #001080">productId:</span><span style="color: #000000"> </span><span style="color: #098658">9</span><span style="color: #000000"> });</span>
 </code></pre>
-				<a href="#those-are-the-keys-accessible-inside-the-box" id="those-are-the-keys-accessible-inside-the-box" style="color: inherit; text-decoration: none;">
-					<h4>Those are the keys accessible inside the box:</h4>
+				<a href="#those-are-the-keys-accessible-inside-the-context" id="those-are-the-keys-accessible-inside-the-context" style="color: inherit; text-decoration: none;">
+					<h4>Those are the keys accessible inside the context:</h4>
 				</a>
 				<ul>
-					<li><strong>context</strong>: is the immutable context you gave as last argument to your <em>pipeFlow</em></li>
+					<li><strong>input</strong>: is the immutable input you gave as last argument to your <em>pipeFlow</em></li>
 					<li><strong>state</strong>: is a mutable key that you can use to pass data from one function to another</li>
 					<li><strong>return</strong>: is the data that will be returned from your <em>pipeFlow</em></li>
 					<li><strong>error</strong>: you can attach an error to the error key, doing so will bypass other functions of the flow, only the error handler will be trigger, you can control wether you want to expose this error or not</li>
@@ -148,19 +152,19 @@
 				<a href="#control-what-is-returned" id="control-what-is-returned" style="color: inherit; text-decoration: none;">
 					<h3>Control What is Returned</h3>
 				</a>
-				<p>You need to attach any data you wish to <strong>return</strong> to the return key of the box, other keys will never be returned.
+				<p>You need to attach any data you wish to <strong>return</strong> to the return key of the &quot;context&quot;, other keys will never be returned.
 				If an error has happened during the flow it will be returned instead.</p>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">handler</span><span style="color: #000000"> = </span><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">product</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">database</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;products&quot;</span><span style="color: #000000">).</span><span style="color: #795E26">where</span><span style="color: #000000">(</span>
 <span style="color: #000000">      </span><span style="color: #A31515">&quot;id&quot;</span><span style="color: #000000">,</span>
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">productId</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from context</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">input</span><span style="color: #000000">.</span><span style="color: #001080">productId</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from context</span>
 <span style="color: #000000">    );</span>
 
 <span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000"> { </span><span style="color: #001080">product</span><span style="color: #000000"> }; </span><span style="color: #008000">// Attach data to the state</span>
 <span style="color: #000000">  },</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
-<span style="color: #000000">    </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">product</span><span style="color: #000000"> </span><span style="color: #008000">// Control data to return</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">product</span><span style="color: #000000"> </span><span style="color: #008000">// Control data to return</span>
 <span style="color: #000000">  }</span>
 <span style="color: #000000">)();</span>
 
@@ -173,20 +177,20 @@
 				<a href="#how-it-works-1" id="how-it-works-1" style="color: inherit; text-decoration: none;">
 					<h3>How it Works</h3>
 				</a>
-				<p>If you want to control what is return from your <em>flowPipe</em> depending of different errors that might happen you need to attach the error to the error key of the &quot;box&quot;.
+				<p>If you want to control what is return from your <em>flowPipe</em> depending of different errors that might happen you need to attach the error to the error key of the &quot;context&quot;.
 					This will skip the execution of all other functions in your flow.
-					<em>The error should be attach to the box and not throw, to control the flow in your application.</em>
-				But if you forget to catch an error it will be attach to the box as well and returned as</p>
+					<em>The error should be attach to the &quot;context&quot; and not throw, to control the flow in your application.</em>
+				But if you forget to catch an error it will be attach to the &quot;context&quot; as well and returned as</p>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">handler</span><span style="color: #000000"> = </span><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">product</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">database</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;products&quot;</span><span style="color: #000000">).</span><span style="color: #795E26">where</span><span style="color: #000000">(</span>
 <span style="color: #000000">      </span><span style="color: #A31515">&quot;id&quot;</span><span style="color: #000000">,</span>
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">productId</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from context</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">input</span><span style="color: #000000">.</span><span style="color: #001080">productId</span><span style="color: #000000"> </span><span style="color: #008000">// Access data from context</span>
 <span style="color: #000000">    );</span>
 
 <span style="color: #000000">    </span><span style="color: #AF00DB">if</span><span style="color: #000000">(!</span><span style="color: #001080">product</span><span style="color: #000000">) {</span>
 
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = { </span><span style="color: #008000">// Attache the error on the box</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = { </span><span style="color: #008000">// Attache the error on the &quot;context&quot;</span>
 <span style="color: #000000">        </span><span style="color: #001080">code:</span><span style="color: #000000"> </span><span style="color: #098658">404</span><span style="color: #000000">,</span>
 <span style="color: #000000">        </span><span style="color: #001080">message:</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;Product Not Found&quot;</span>
 <span style="color: #000000">      };</span>
@@ -196,15 +200,15 @@
 <span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000"> { </span><span style="color: #001080">product</span><span style="color: #000000"> }; </span><span style="color: #008000">// Attach data to the state</span>
 <span style="color: #000000">  },</span>
 <span style="color: #000000">  </span><span style="color: #008000">// If an error has been attach in the previous function this one will not run</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">updatedProduct</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">database</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;product&quot;</span><span style="color: #000000">).</span><span style="color: #795E26">where</span><span style="color: #000000">(</span>
 <span style="color: #000000">      </span><span style="color: #A31515">&quot;id&quot;</span><span style="color: #000000">,</span>
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">product</span><span style="color: #000000">.</span><span style="color: #001080">id</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">product</span><span style="color: #000000">.</span><span style="color: #001080">id</span>
 <span style="color: #000000">    ).</span><span style="color: #795E26">update</span><span style="color: #000000">(</span>
 <span style="color: #000000">      { </span><span style="color: #001080">sold:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000">}</span>
 <span style="color: #000000">    );</span>
 
-<span style="color: #000000">    </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">updatedProduct</span><span style="color: #000000">;</span>
+<span style="color: #000000">    </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">updatedProduct</span><span style="color: #000000">;</span>
 <span style="color: #000000">  }</span>
 <span style="color: #000000">)();</span>
 </code></pre>
@@ -217,7 +221,7 @@
 <span style="color: #000000">}</span>
 </code></pre>
 				<ul>
-					<li>The type of an error to attach to the error key of the box should looks like this:</li>
+					<li>The type of an error to attach to the error key of the &quot;context&quot; should looks like this:</li>
 					<li><strong>code</strong>: the error code</li>
 					<li><strong>message</strong>: the error message</li>
 					<li><strong>error</strong>: the error itself created from the message, will include stacktrace<pre><code class="language-ts"><span style="color: #0000FF">type</span><span style="color: #000000"> </span><span style="color: #267F99">FlowError</span><span style="color: #000000"> = {</span>
@@ -242,14 +246,14 @@
 				<a href="#error-helpers" id="error-helpers" style="color: inherit; text-decoration: none;">
 					<h3>Error Helpers</h3>
 				</a>
-				<p>You can use little error helper to format the errors attached to the box.</p>
+				<p>You can use little error helper to format the errors attached to the &quot;context&quot;.</p>
 				<ul>
 					<li><strong>errorBuilder</strong>: the error builder will help you build the error to be returned to the user, it is a curried function so you can pass it&#39;s parameter one at the time. </li>
 					<li>code (default to 1): the error code</li>
 					<li>message or error (default to &quot;Internal Error&quot; message): the message that will be attach to the error and use to create Error object</li>
 				</ul>
 				<p>example 1:</p>
-				<pre><code class="language-js"><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">errorBuilder</span><span style="color: #000000">()()</span>
+				<pre><code class="language-js"><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">errorBuilder</span><span style="color: #000000">()()</span>
 </code></pre>
 				<p>Will return </p>
 				<pre><code><span style="color: #000000">{</span>
@@ -259,9 +263,9 @@
 <span style="color: #000000">}</span>
 </code></pre>
 				<p>example 2:</p>
-				<pre><code class="language-js"><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">errorBuilder</span><span style="color: #000000">(</span><span style="color: #098658">9</span><span style="color: #000000">)(</span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">Error</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;Could not process arguments&quot;</span><span style="color: #000000">))</span>
+				<pre><code class="language-js"><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">errorBuilder</span><span style="color: #000000">(</span><span style="color: #098658">9</span><span style="color: #000000">)(</span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">Error</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;Could not process arguments&quot;</span><span style="color: #000000">))</span>
 <span style="color: #008000">// Same as</span>
-<span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">errorBuilder</span><span style="color: #000000">(</span><span style="color: #098658">9</span><span style="color: #000000">)(</span><span style="color: #A31515">&quot;Could not process arguments&quot;</span><span style="color: #000000">)</span>
+<span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">errorBuilder</span><span style="color: #000000">(</span><span style="color: #098658">9</span><span style="color: #000000">)(</span><span style="color: #A31515">&quot;Could not process arguments&quot;</span><span style="color: #000000">)</span>
 </code></pre>
 				<p>Will return </p>
 				<pre><code><span style="color: #000000">{</span>
@@ -283,14 +287,14 @@
 </code></pre>
 				<pre><code class="language-js"><span style="color: #0000FF">const</span><span style="color: #000000"> { </span><span style="color: #0070C1">notAuthorizedError</span><span style="color: #000000"> } = </span><span style="color: #795E26">require</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;@bjmrq/pipe-flow&quot;</span><span style="color: #000000">)</span>
 <span style="color: #267F99">exports</span><span style="color: #000000">.</span><span style="color: #001080">handler</span><span style="color: #000000"> = </span><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(</span>
-<span style="color: #000000">  (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
-<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">authorizationToken</span><span style="color: #000000"> = </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">token</span><span style="color: #000000">;</span>
+<span style="color: #000000">  (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">authorizationToken</span><span style="color: #000000"> = </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">input</span><span style="color: #000000">.</span><span style="color: #001080">token</span><span style="color: #000000">;</span>
 
 <span style="color: #000000">    </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (!</span><span style="color: #001080">authorizationToken</span><span style="color: #000000">) {</span>
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">notAuthorizedError</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;You can&#039;t do that&quot;</span><span style="color: #000000">);</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">notAuthorizedError</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;You can&#039;t do that&quot;</span><span style="color: #000000">);</span>
 <span style="color: #000000">    }</span>
 
-<span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000"> { </span><span style="color: #001080">isAuthenticated:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000"> }; </span><span style="color: #008000">// Only taken in consideration if no error was attached to the box</span>
+<span style="color: #000000">    </span><span style="color: #AF00DB">return</span><span style="color: #000000"> { </span><span style="color: #001080">isAuthenticated:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span><span style="color: #000000"> }; </span><span style="color: #008000">// Only taken in consideration if no error was attached to the &quot;context&quot;</span>
 <span style="color: #000000">  },</span>
 <span style="color: #000000">)();</span>
 </code></pre>
@@ -299,35 +303,35 @@
 				</a>
 				<p>If you wish to have extra logic triggered when an error occurres (send log to remote place, call a cloud service..) you can provide <code>pipeFlow</code> with an extra function.</p>
 				<pre><code class="language-js"><span style="color: #267F99">exports</span><span style="color: #000000">.</span><span style="color: #001080">handler</span><span style="color: #000000"> = </span><span style="color: #795E26">pipeFlow</span><span style="color: #000000">(</span>
-<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #0000FF">async</span><span style="color: #000000"> (</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
 
 <span style="color: #000000">    </span><span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">product</span><span style="color: #000000"> = </span><span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #795E26">database</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;product&quot;</span><span style="color: #000000">).</span><span style="color: #795E26">where</span><span style="color: #000000">(</span>
 <span style="color: #000000">      </span><span style="color: #A31515">&quot;id&quot;</span><span style="color: #000000">,</span>
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">productId</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">state</span><span style="color: #000000">.</span><span style="color: #001080">productId</span>
 <span style="color: #000000">    );</span>
 
 <span style="color: #000000">    </span><span style="color: #AF00DB">if</span><span style="color: #000000"> (!</span><span style="color: #001080">product</span><span style="color: #000000">) {</span>
-<span style="color: #000000">      </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">notFoundError</span><span style="color: #000000">(</span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">Error</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;Could not find this product&quot;</span><span style="color: #000000">));</span>
+<span style="color: #000000">      </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000"> = </span><span style="color: #795E26">notFoundError</span><span style="color: #000000">(</span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">Error</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;Could not find this product&quot;</span><span style="color: #000000">));</span>
 <span style="color: #000000">    }</span>
 <span style="color: #000000">    </span>
-<span style="color: #000000">    </span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">product</span>
+<span style="color: #000000">    </span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">return</span><span style="color: #000000"> = </span><span style="color: #001080">product</span>
 <span style="color: #008000">// Extra error handler</span>
-<span style="color: #000000">)((</span><span style="color: #001080">box</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
-<span style="color: #000000">  </span><span style="color: #795E26">sendLogs</span><span style="color: #000000">(</span><span style="color: #001080">box</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000">)</span>
+<span style="color: #000000">)((</span><span style="color: #001080">context</span><span style="color: #000000">) </span><span style="color: #0000FF">=&gt;</span><span style="color: #000000"> {</span>
+<span style="color: #000000">  </span><span style="color: #795E26">sendLogs</span><span style="color: #000000">(</span><span style="color: #001080">context</span><span style="color: #000000">.</span><span style="color: #001080">error</span><span style="color: #000000">)</span>
 <span style="color: #000000">});</span>
 </code></pre>
 				<ul>
-					<li>In the error handler you will have access to the whole box that caused the error with it&#39;s state and the error itself</li>
-					<li>The box in the error handler is a copy of the box that will be return, mutating it will not change the returned value</li>
+					<li>In the error handler you will have access to the whole &quot;context&quot; that caused the error with it&#39;s state and the error itself</li>
+					<li>The &quot;context&quot; in the error handler is a copy of the &quot;context&quot; that will be return, mutating it will not change the returned value</li>
 				</ul>
-				<a href="#the-flow-and-it39s-box-recap" id="the-flow-and-it39s-box-recap" style="color: inherit; text-decoration: none;">
-					<h2>The Flow and it&#39;s Box Recap</h2>
+				<a href="#the-flow-and-it39s-context-recap" id="the-flow-and-it39s-context-recap" style="color: inherit; text-decoration: none;">
+					<h2>The Flow and it&#39;s Context Recap</h2>
 				</a>
-				<p>A <em>flow</em> is similar to a pipe function in functional programming, you can combine your functions from left to right, and the <em>&quot;box&quot;</em> will flow thought them, what you return from those functions will be attach to the state of the &quot;box&quot; so it can be passed on to the next function of the flow.
-				Anything you wish to return can be attached to the return entry of the &quot;box&quot;.</p>
-				<p>Those are the keys accessible inside the box</p>
+				<p>A <em>flow</em> is similar to a pipe function in functional programming, you can combine your functions from left to right, and the <em>&quot;context&quot;</em> will flow thought them, what you return from those functions will be attach to the state of the &quot;context&quot; so it can be passed on to the next function of the flow.
+				Anything you wish to return can be attached to the return entry of the &quot;context&quot;.</p>
+				<p>Those are the keys accessible inside the &quot;context&quot;</p>
 				<ul>
-					<li><strong>context</strong>: is the context data you passed to you pipe, it is immutable</li>
+					<li><strong>input</strong>: is the context data you passed to you pipe, it is immutable</li>
 					<li><strong>state</strong>: is a mutable key that you can use to pass data from one function to another</li>
 					<li><strong>error</strong>: you can attach an error to the error key, doing so will bypass other functions of the flow, only the error handler will be trigger. (will be returned from your pipe if any)</li>
 					<li><strong>return</strong>: what will be returned from your pipe</li>
@@ -369,6 +373,9 @@
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="modules.html#simpleerror" class="tsd-kind-icon">simple<wbr>Error</a>
+					</li>
+					<li class=" tsd-kind-function tsd-has-type-parameter">
+						<a href="modules.html#subflow" class="tsd-kind-icon">sub<wbr>Flow</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="modules.html#unprocessableerror" class="tsd-kind-icon">unprocessable<wbr>Error</a>
