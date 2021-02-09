@@ -1,5 +1,4 @@
 import { readOnly, tryCatchAsync } from "@bjmrq/utils";
-import { flow, pipe } from "fp-ts/lib/function";
 import * as R from "ramda";
 import {
   CreateContext,
@@ -27,9 +26,9 @@ const createContext: CreateContext = (input) =>
 // @internal
 const returnData = async (context: Promise<FlowContext>) =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  flow(
+  R.pipe(
     R.ifElse(
-      flow(R.prop("error"), R.is(Object)),
+      R.pipe(R.prop("error"), R.is(Object)),
       R.prop("error"),
       R.prop("return")
     )
@@ -51,24 +50,25 @@ const notCatchedErrors = (middleware: FlowMiddleware) => (
   error: Error,
   errorContext: FlowContextWithError
 ) =>
-  pipe(
-    errorContext,
+  R.pipe(
+    // @ts-expect-error
     R.assoc("error", enhancedErrors(middleware)(error)),
     R.tap(logError)
-  );
+    // @ts-expect-error
+  )(errorContext);
 
 // @internal
 const errorOut: ErrorOut = (middleware) => async (context) =>
   // @ts-expect-error
-  flow(
+  R.pipe(
     R.unless(
-      flow(R.prop("error"), R.is(Object)),
+      // @ts-expect-error
+      R.pipe(R.prop("error"), R.is(Object)),
       tryCatchAsync(
         updateContextState(middleware),
         notCatchedErrors(middleware)
       )
     )
-    // @ts-expect-error
   )(await context);
 
 // @internal
@@ -76,17 +76,17 @@ const errorCallbackHandler: ErrorCallbackHandler = (errorCallback) => async (
   context
 ) =>
   // @ts-expect-error
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   R.when(
-    flow(R.prop("error"), R.is(Object)),
     // @ts-expect-error
-    flow(R.clone, errorCallback, R.always(await context))
+    R.pipe(R.prop("error"), R.is(Object)),
+    R.pipe(R.clone, errorCallback, R.always(await context))
+    // @ts-expect-error
   )(await context);
 
 /**
  * Will process your data encapsulated in a "context" through your middlewares and then return it's response
  * @param {Array<FlowMiddleware<M>>} ...middlewares - All the middleware that will process your "context"
- * @returns {Promise<FlowContext<M, Y, X>["return"]>} - The returned value from your flow
+ * @returns {Promise<FlowContext<M, Y, X>["return"]>} - The returned value from your R.pipe
  */
 const pipeFlow: PipeFlow = (...middlewares) => (errorCallback = R.identity) =>
   // @ts-expect-error
@@ -100,11 +100,10 @@ const pipeFlow: PipeFlow = (...middlewares) => (errorCallback = R.identity) =>
 /**
  * A sub routine to use with pipeFlow that will pass the "context" of pipeFlow through your functions
  * @param {Array<FlowMiddleware<M>>} ...middlewares - All the middleware that will process your "context"
- * @returns {Promise<FlowContext<M, Y, X>["state"]>} - The returned value from your flow
+ * @returns {Promise<FlowContext<M, Y, X>["state"]>} - The returned value from your R.pipe
  */
 const subFlow: SubFlow = (...middlewares) =>
-  // @ts-expect-error
-  flow(
+  R.pipe(
     ...R.map(errorOut)(middlewares),
     // @ts-expect-error
     async (context: Promise<FlowContext>) =>
