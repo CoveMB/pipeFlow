@@ -43,11 +43,14 @@ const addToReturnOnFn = R.curry(
 
 /**
  * Little helper to merge some data in the actual state property
+ * @param {() => any} toState - function to attach return value from
  */
 const addToReturn = addToReturnFn;
 
 /**
  * Little helper to merge some data in the actual state property
+ * @param {string} keyToAttachOn - key to attach value on the return
+ * @param {() => any} toState - function to attach return value from
  */
 const addToReturnOn = addToReturnOnFn;
 
@@ -78,11 +81,14 @@ const addToStateOnFn = R.curry(
 
 /**
  * Little helper to merge some data in the actual return property
+ * @param {() => any} toState - function to attach return value from
  */
 const addToState = addToStateFn;
 
 /**
  * Little helper to merge some data in the actual return property
+ * @param {string} keyToAttachOn - key to attach value on the state
+ * @param {() => any} toState - function to attach return value from
  */
 const addToStateOn = addToStateOnFn;
 

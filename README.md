@@ -307,7 +307,7 @@ exports.handler = pipeFlow(
 
 ## Utilities
 
-- debugFlow: will help you debug the state of your context (optionally your can pass an array of string to retrieve the value at a given path)
+- **debugFlow**: will help you debug the state of your context (optionally your can pass an array of string to retrieve the value at a given path)
 example:
 ```js
 const handler = pipeFlow(
@@ -329,8 +329,8 @@ const handler = pipeFlow(
 handler({ id: 9 });
 ```
 
-- addToReturn: will add the return value of a given function to the return property
-- addToState: will add the return value of a given function to the state property
+- **addToReturn**: will add the return value of a given function to the return property
+- **addToState**: will add the return value of a given function to the state property
   
 ```js
 const handler = pipeFlow(
@@ -341,6 +341,17 @@ const result = handler(() => { id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
+- **addToReturnOn**: will add the return value on the given key of a given function to the return property
+- **addToStateOn**: will add the return value on the given key of a given function to the state property 
+
+```js
+const handler = pipeFlow(
+  addToReturnOn("status", () => "ok" ),
+)();
+
+const result = handler(() => { id: 9 });
+console.log(result) // { status: "ok" }
+```
 ## The Flow and it's Context Recap
 
 A *flow* is similar to a pipe function in functional programming, you can combine your functions from left to right, and the *"context"* will flow thought them, what you return from those functions will be attach to the state of the "context" so it can be passed on to the next function of the flow.
