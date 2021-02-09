@@ -329,15 +329,15 @@ const handler = pipeFlow(
 handler({ id: 9 });
 ```
 
-- addToReturn: will add a given value to the return property
-- addToState: will add a given value to the state property
+- addToReturn: will add the return value of a given function to the return property
+- addToState: will add the return value of a given function to the state property
   
 ```js
 const handler = pipeFlow(
-  addToReturn({ status: "ok" }),
+  addToReturn(() => { status: "ok" }),
 )();
 
-const result = handler({ id: 9 });
+const result = handler(() => { id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
