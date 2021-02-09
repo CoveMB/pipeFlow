@@ -16,11 +16,11 @@ const debugFlow: (
  * Little helper to merge some data in the actual state property
  */
 const addToReturn = R.curry(
-  <M extends Record<any, any> = Record<any, any>>(
-    toReturn: M,
+  async <M extends Record<any, any> = Record<any, any>>(
+    toReturn: () => M | Promise<M>,
     context: FlowContext
-  ): FlowContext["return"] & M => {
-    context.return = R.merge(toReturn, context.return);
+  ): Promise<FlowContext["return"] & M> => {
+    context.return = R.merge(await toReturn(), context.return);
 
     return undefined;
   }
@@ -30,10 +30,11 @@ const addToReturn = R.curry(
  * Little helper to merge some data in the actual return property
  */
 const addToState = R.curry(
-  <M extends Record<any, any> = Record<any, any>>(
-    toState: M,
+  async <M extends Record<any, any> = Record<any, any>>(
+    toState: () => M | Promise<M>,
     context: FlowContext
-  ): FlowContext["state"] & M => R.merge(toState, context.state)
+  ): Promise<FlowContext["state"] & M> =>
+    R.merge(await toState(), context.state)
 );
 
 export { debugFlow, addToReturn, addToState };
