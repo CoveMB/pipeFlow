@@ -90,7 +90,7 @@ const errorCallbackHandler: ErrorCallbackHandler = (errorCallback) => async (
  */
 const pipeFlow: PipeFlow = (...middlewares) => (errorCallback = R.identity) =>
   // @ts-expect-error
-  flow(
+  R.pipe(
     createContext,
     ...R.map(errorOut)(middlewares),
     errorCallbackHandler(errorCallback),

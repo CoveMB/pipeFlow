@@ -64,3 +64,24 @@ it("Should return return from context", async () => {
 
   expect(JSON.stringify(returnedFromFlow)).toBe(JSON.stringify(bodyToReturn));
 });
+
+it("Should not return undefined if lot of middlewares", async () => {
+  const returnedFromFlow = await pipeFlow(
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    () => console.log(),
+    (context) => {
+      context.return = "ok";
+    }
+  )()(pipeContext);
+
+  expect(returnedFromFlow).toBe("ok");
+});
