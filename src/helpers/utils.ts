@@ -72,7 +72,7 @@ const addToStateOnFn = R.curry(
     // @ts-expect-error
     base[keyToAttachOn] = await toState();
 
-    return R.merge(await toState(), context.state);
+    return R.merge(base, context.state);
   }
 );
 
