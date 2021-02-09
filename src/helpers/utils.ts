@@ -5,7 +5,7 @@ import { FlowContext } from "../types";
  * Log the context object without stopping process of the flow
  */
 const debugFlow: (
-  path?: string | string[] | number | number[]
+  path?: string | number | Array<string | number>
 ) => (context: FlowContext) => void = (path?) => (context) =>
   console.debug(
     // eslint-disable-next-line array-func/prefer-array-from

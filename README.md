@@ -1,5 +1,5 @@
 # PipeFlow
-**THIS IS A WORK IN PROGRESS**
+**THIS IS A WORK IN PROGRESS BREAKING CHANGED CAN HAPPEN ANY TIME BEFORE v1 release**
 
 ### A little utility to process data in a pipe
 
@@ -120,6 +120,32 @@ const handler = pipeFlow(
 const result = handler({ productId: 9 })
 console.log(result) // { id: 9, name: "A great product indeed", type: "product",... }
 ```
+
+### Create a sub pipe
+
+You can use **subFlow** to branch different flow together subFlow receive an already built context and will be able to attache data to it's return and state property.
+
+```js
+const handler = pipeFlow(
+  (context) => {
+    console.log(context.input) // {id: 9}
+
+    return { status: "ok" } // Attach data to the state
+  },
+  subFlow(
+    async (context) => {
+    return { subFlow: true } // "ok"
+  },
+  (context) => {
+    context.return = context.state
+  }
+  )
+)();
+
+const result = handler({ id: 9 });
+console.log(result) // { status: "ok", subFlow: true }
+```
+
 
 ## Error Handling
 
@@ -277,6 +303,43 @@ exports.handler = pipeFlow(
 ```
 - In the error handler you will have access to the whole "context" that caused the error with it's state and the error itself
 - The "context" in the error handler is a copy of the "context" that will be return, mutating it will not change the returned value
+
+
+## Utilities
+
+- debugFlow: will help you debug the state of your context (optionally your can pass an array of string to retrieve the value at a given path)
+example:
+```js
+const handler = pipeFlow(
+  (context) => {
+    return { status: "ok" } // Attach data to the state
+  },
+  debugFlow() // { input: { id: 9 }, state: { status: "ok" }, error: undefined, return undefined}
+)();
+
+handler({ id: 9 });
+
+const handler = pipeFlow(
+  (context) => {
+    return { status: "ok" } // Attach data to the state
+  },
+  debugFlow(["state", "status"]) // "ok"
+)();
+
+handler({ id: 9 });
+```
+
+- addToReturn: will add a given value to the return property
+- addToState: will add a given value to the state property
+  
+```js
+const handler = pipeFlow(
+  addToReturn({ status: "ok" }),
+)();
+
+const result = handler({ id: 9 });
+console.log(result) // { status: "ok" }
+```
 
 ## The Flow and it's Context Recap
 
