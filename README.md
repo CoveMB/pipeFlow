@@ -16,6 +16,9 @@ In the "context" their is also a return entry so you can control what you wish t
 
 You will also find some little helpers to help you with error handling.
 
+And some utilities like: 
+debugFlow / addToState / addToStateOn / addToReturn / addToReturnOn / returnWith
+
 ## Installation
 With npm:
 ```
@@ -330,8 +333,6 @@ handler({ id: 9 });
 ```
 
 - **addToReturn**: will add the return value of a given function to the return property
-- **addToState**: will add the return value of a given function to the state property
-  
 ```js
 const handler = pipeFlow(
   addToReturn(() => { status: "ok" }),
@@ -341,9 +342,20 @@ const result = handler(() => { id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
-- **addToReturnOn**: will add the return value on the given key of a given function to the return property
-- **addToStateOn**: will add the return value on the given key of a given function to the state property 
+- **addToState**: will add the return value of a given function to the state property
+```js
+const handler = pipeFlow(
+  addToState(() => { status: "ok" }),
+  (context) => {
+    console.log(context.state) // { status: "ok" }
+  }
+)();
 
+const result = handler(() => { id: 9 });
+```
+
+
+- **addToReturnOn**: will add the return value on the given key of a given function to the return property
 ```js
 const handler = pipeFlow(
   addToReturnOn("status", () => "ok" ),
@@ -352,6 +364,35 @@ const handler = pipeFlow(
 const result = handler(() => { id: 9 });
 console.log(result) // { status: "ok" }
 ```
+
+- **addToStateOn**: will add the return value on the given key of a given function to the state property
+```js
+const handler = pipeFlow(
+  addToStateOn("object", () => { status: "ok" }),
+  (context) => {
+    console.log(context.state) // { object: { status: "ok" }}
+  }
+)();
+
+const result = handler(() => { id: 9 });
+```
+
+
+- **returnWith**: usually used at the end of the pipeFlow or subFlow, will return the given path from the context
+```js
+const handler = pipeFlow(
+  addToStateOn("object", () => { status: "ok" }),
+  (context) => {
+    console.log(context.state) // { object: { status: "ok" }}
+  },
+  returnWith(["state", "object", "status"])
+)();
+
+const result = handler(() => { id: 9 });
+console.log(result) // "ok"
+```
+
+
 ## The Flow and it's Context Recap
 
 A *flow* is similar to a pipe function in functional programming, you can combine your functions from left to right, and the *"context"* will flow thought them, what you return from those functions will be attach to the state of the "context" so it can be passed on to the next function of the flow.

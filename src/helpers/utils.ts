@@ -97,6 +97,10 @@ const addToStateOn = addToStateOnFn;
 
 // - - - - -
 
+/**
+ * Little helper to simply return a path from the context
+ * @param {string | number | Array<string | number>} pathToReturn - key to attach value on the state
+ */
 const returnWith = (pathToReturn: string | number | Array<string | number>) => (
   context: FlowContext
 ) => {
