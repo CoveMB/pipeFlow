@@ -1,3 +1,6 @@
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable fp/no-mutation */
 import * as R from "ramda";
 import { FlowContext } from "../types";
 
@@ -54,14 +57,14 @@ const addToReturn = addToReturnFn;
  */
 const addToReturnOn = addToReturnOnFn;
 
-//  - - - - -
+// - - - - -
 
 const addToStateFn = R.curry(
   async <M extends Record<any, any> = Record<any, any>>(
     toState: () => M | Promise<M>,
     context: FlowContext
   ): Promise<FlowContext["state"] & M> =>
-    R.merge(await toState(), context.state)
+    R.merge(await toState(), context.state) as FlowContext
 );
 
 const addToStateOnFn = R.curry(
@@ -75,7 +78,7 @@ const addToStateOnFn = R.curry(
     // @ts-expect-error
     base[keyToAttachOn] = await toState();
 
-    return R.merge(base, context.state);
+    return R.merge(base, context.state) as FlowContext;
   }
 );
 
@@ -92,4 +95,23 @@ const addToState = addToStateFn;
  */
 const addToStateOn = addToStateOnFn;
 
-export { addToStateOn, addToReturnOn, debugFlow, addToReturn, addToState };
+// - - - - -
+
+const returnWith = (pathToReturn: string | number | Array<string | number>) => (
+  context: FlowContext
+) => {
+  context.return = R.path(
+    // eslint-disable-next-line array-func/prefer-array-from
+    [...(Array.isArray(pathToReturn) ? pathToReturn : [pathToReturn])],
+    context
+  );
+};
+
+export {
+  addToStateOn,
+  addToReturnOn,
+  debugFlow,
+  addToReturn,
+  addToState,
+  returnWith,
+};
