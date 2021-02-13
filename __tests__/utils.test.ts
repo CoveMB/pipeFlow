@@ -2,6 +2,7 @@ import {
   addToReturn,
   addToReturnOn,
   addToState,
+  addToStateImmutableOn,
   addToStateOn,
   pipeFlow,
   returnWith,
@@ -9,7 +10,7 @@ import {
 import { pipeContext } from "./fixtures/data";
 
 it("Should add data to the return property of the context", async () => {
-  const extraData = { key: "test", value: test };
+  const extraData = { key: "test", value: true };
 
   const returnedFromFlow = await pipeFlow<typeof pipeContext>(
     addToReturn(() => extraData)
@@ -19,7 +20,7 @@ it("Should add data to the return property of the context", async () => {
 });
 
 it("Should add data to the return property of the context on a certain property", async () => {
-  const extraData = { key: "test", value: test };
+  const extraData = { key: "test", value: true };
 
   const returnedFromFlow = await pipeFlow<typeof pipeContext>(
     addToReturnOn("object", () => extraData)
@@ -31,7 +32,7 @@ it("Should add data to the return property of the context on a certain property"
 });
 
 it("Should add data to the state property of the context", async () => {
-  const extraData = { key: "test", value: test };
+  const extraData = { key: "test", value: true };
 
   const returnedFromFlow = await pipeFlow<typeof pipeContext>(
     addToState(() => extraData),
@@ -44,7 +45,7 @@ it("Should add data to the state property of the context", async () => {
 });
 
 it("Should add data to the state property of the context on a certain property", async () => {
-  const extraData = { key: "test", value: test };
+  const extraData = { key: "test", value: true };
 
   const returnedFromFlow = await pipeFlow<typeof pipeContext>(
     addToStateOn("object", () => extraData),
@@ -59,7 +60,7 @@ it("Should add data to the state property of the context on a certain property",
 });
 
 it("Should return the data in the given path if path is string", async () => {
-  const extraData = { key: "test", value: test };
+  const extraData = { key: "test", value: true };
 
   const returnedFromFlow = await pipeFlow<typeof pipeContext>(
     addToState(() => extraData),
@@ -70,7 +71,7 @@ it("Should return the data in the given path if path is string", async () => {
 });
 
 it("Should return the data in the given path if path is array", async () => {
-  const extraData = { key: "test", value: test };
+  const extraData = { key: "test", value: true };
 
   const returnedFromFlow = await pipeFlow<typeof pipeContext>(
     addToStateOn("object", () => extraData),
@@ -78,4 +79,28 @@ it("Should return the data in the given path if path is array", async () => {
   )()(pipeContext);
 
   expect(JSON.stringify(returnedFromFlow)).toBe(JSON.stringify(extraData));
+});
+
+it("Data added with the immutable utility should be immutable", async () => {
+  const extraData = { key: "test", value: true, object: { val: true } };
+
+  const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
+    addToStateImmutableOn("immutable", () => extraData),
+    (context) => {
+      // @ts-expect-error
+      console.log(Object.isFrozen(context.state.immutable));
+      // @ts-expect-error
+      context.state.immutable.key = false;
+    },
+    (context) => {
+      context.return = context.state;
+    }
+  )()(pipeContext);
+
+  console.log(returnedFromFlow);
+
+  // @ts-ignore
+  expect(returnedFromFlow.message).toBe(
+    "Cannot assign to read only property 'key' of object '#<Object>'"
+  );
 });

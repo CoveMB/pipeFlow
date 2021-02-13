@@ -332,7 +332,7 @@ const handler = pipeFlow(
 handler({ id: 9 });
 ```
 
-- **addToReturn**: will add the return value of a given function to the return property
+- **addToReturn**: will add the return value of a given function to the return property of the context
 ```js
 const handler = pipeFlow(
   addToReturn(() => { status: "ok" }),
@@ -342,7 +342,7 @@ const result = handler(() => { id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
-- **addToState**: will add the return value of a given function to the state property
+- **addToState**: will add the return value of a given function to the state property of the context
 ```js
 const handler = pipeFlow(
   addToState(() => { status: "ok" }),
@@ -355,7 +355,7 @@ const result = handler(() => { id: 9 });
 ```
 
 
-- **addToReturnOn**: will add the return value on the given key of a given function to the return property
+- **addToReturnOn**: will add the return value of a given function to the specified key to the return property of the context
 ```js
 const handler = pipeFlow(
   addToReturnOn("status", () => "ok" ),
@@ -365,7 +365,7 @@ const result = handler(() => { id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
-- **addToStateOn**: will add the return value on the given key of a given function to the state property
+- **addToStateOn**: will add the return value of a given function to the specified key to the state property of the context
 ```js
 const handler = pipeFlow(
   addToStateOn("object", () => { status: "ok" }),
@@ -376,6 +376,8 @@ const handler = pipeFlow(
 
 const result = handler(() => { id: 9 });
 ```
+
+- **addToStateImmutableOn**: will add the return value of a given function to the specified key to the state property of the context, and make it read only
 
 
 - **returnWith**: usually used at the end of the pipeFlow or subFlow, will return the given path from the context

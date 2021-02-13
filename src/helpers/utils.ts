@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable fp/no-mutation */
+import { readOnly } from "@bjmrq/utils";
 import * as R from "ramda";
 import { FlowContext } from "../types";
 
@@ -45,13 +46,13 @@ const addToReturnOnFn = R.curry(
 );
 
 /**
- * Little helper to merge some data in the actual state property
+ * Little helper to merge some data in the return property of the context
  * @param {() => any} toState - function to attach return value from
  */
 const addToReturn = addToReturnFn;
 
 /**
- * Little helper to merge some data in the actual state property
+ * Little helper to merge some data in the return property of the context
  * @param {string} keyToAttachOn - key to attach value on the return
  * @param {() => any} toState - function to attach return value from
  */
@@ -61,39 +62,60 @@ const addToReturnOn = addToReturnOnFn;
 
 const addToStateFn = R.curry(
   async <M extends Record<any, any> = Record<any, any>>(
+    immutable: boolean,
     toState: () => M | Promise<M>,
     context: FlowContext
   ): Promise<FlowContext["state"] & M> =>
-    R.merge(await toState(), context.state) as FlowContext
+    R.merge(
+      immutable ? readOnly(await toState()) : await toState(),
+      context.state
+    ) as FlowContext
 );
 
 const addToStateOnFn = R.curry(
   async <M extends Record<any, any> = Record<any, any>>(
+    immutable: boolean,
     keyToAttachOn: string,
     toState: () => M | Promise<M>,
     context: FlowContext
+    // eslint-disable-next-line max-params
   ): Promise<FlowContext["state"] & M> => {
     const base = {};
 
     // @ts-expect-error
-    base[keyToAttachOn] = await toState();
+    base[keyToAttachOn] = immutable
+      ? readOnly(await toState())
+      : await toState();
 
     return R.merge(base, context.state) as FlowContext;
   }
 );
 
 /**
- * Little helper to merge some data in the actual return property
+ * Little helper to merge some data in the state property of the context
  * @param {() => any} toState - function to attach return value from
  */
-const addToState = addToStateFn;
+const addToState = addToStateFn(false);
 
 /**
- * Little helper to merge some data in the actual return property
+ * Little helper to merge some data in the state property of the context
  * @param {string} keyToAttachOn - key to attach value on the state
  * @param {() => any} toState - function to attach return value from
  */
-const addToStateOn = addToStateOnFn;
+const addToStateOn = addToStateOnFn(false);
+
+// /**
+//  * Little helper to merge some data in the state property of the context
+//  * @param {() => any} toState - function to attach return value from
+//  */
+// const addToStateImmutable = addToStateFn(true);
+
+/**
+ * Little helper to merge some immutable data in the state property of the context
+ * @param {string} keyToAttachOn - key to attach value on the state
+ * @param {() => any} toState - function to attach return value from
+ */
+const addToStateImmutableOn = addToStateOnFn(true);
 
 // - - - - -
 
@@ -118,4 +140,5 @@ export {
   addToReturn,
   addToState,
   returnWith,
+  addToStateImmutableOn,
 };
