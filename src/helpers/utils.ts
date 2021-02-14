@@ -3,7 +3,7 @@
 /* eslint-disable fp/no-mutation */
 import { readOnly } from "@bjmrq/utils";
 import * as R from "ramda";
-import { FlowContext } from "../types";
+import { FlowContext, FlowMiddleware } from "../types";
 
 /**
  * Log the context object without stopping process of the flow
@@ -133,7 +133,23 @@ const returnWith = (pathToReturn: string | number | Array<string | number>) => (
   );
 };
 
+// - - - - -
+
+const flowIfFn = <M extends FlowContext>(
+  predicateFn: (context: M) => boolean,
+  whenTrueMiddleware: FlowMiddleware<M>
+) => (context: M) =>
+  predicateFn(context) ? whenTrueMiddleware(context) : undefined;
+
+/**
+ * Execute a given function of the flow only if the given predicate return true
+ * @param {(context: FlowContext) => boolean} predicateFn - predicate function
+ * @param {FlowMiddleware} whenTrueFn - function to invoke when the `condition` evaluates to a truthy value.
+ */
+const flowIf = flowIfFn;
+
 export {
+  flowIf,
   addToStateOn,
   addToReturnOn,
   debugFlow,

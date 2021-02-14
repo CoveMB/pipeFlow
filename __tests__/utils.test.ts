@@ -4,6 +4,7 @@ import {
   addToState,
   addToStateImmutableOn,
   addToStateOn,
+  flowIf,
   pipeFlow,
   returnWith,
 } from "../src";
@@ -103,4 +104,41 @@ it("Data added with the immutable utility should be immutable", async () => {
   expect(returnedFromFlow.message).toBe(
     "Cannot assign to read only property 'key' of object '#<Object>'"
   );
+});
+
+it("Should not execute middleware if predicate is false", async () => {
+  const extraData = { key: "test", value: true, object: { val: true } };
+
+  const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
+    addToStateImmutableOn("immutable", () => extraData),
+    flowIf(
+      () => true,
+      (context) => {
+        context.return = { hasExecuted: true };
+      }
+    )
+  )()(pipeContext);
+
+  console.log(returnedFromFlow);
+
+  // @ts-ignore
+  expect(returnedFromFlow.hasExecuted).toBe(true);
+});
+
+it("Should not execute middleware if predicate is false", async () => {
+  const extraData = { key: "test", value: true, object: { val: true } };
+
+  const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
+    addToStateImmutableOn("immutable", () => extraData),
+    flowIf(
+      (ignore) => false,
+      (context) => {
+        context.return = { hasExecuted: true };
+      }
+    )
+  )()(pipeContext);
+
+  console.log(returnedFromFlow);
+
+  expect(returnedFromFlow).toBe(undefined);
 });

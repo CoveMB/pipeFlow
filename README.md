@@ -17,7 +17,7 @@ In the "context" their is also a return entry so you can control what you wish t
 You will also find some little helpers to help you with error handling.
 
 And some utilities like: 
-debugFlow / addToState / addToStateOn / addToReturn / addToReturnOn / returnWith
+debugFlow / flowIf / addToState / addToStateOn / addToReturn / addToReturnOn / returnWith
 
 ## Installation
 With npm:
@@ -392,6 +392,36 @@ const handler = pipeFlow(
 
 const result = handler(() => { id: 9 });
 console.log(result) // "ok"
+```
+
+- **flowIf**: Execute a given function of the flow only if the given predicate return true
+```js
+const handler = pipeFlow(
+  addToStateOn("object", () => { shouldExecute: true }),
+  flowIf(
+      (context) => context.state.shouldExecute,
+      (context) => {
+        context.return = { hasExecuted: true };
+      }
+    )
+)();
+
+const result = handler(() => { id: 9 });
+console(result) // { hasExecuted: true }
+```
+```js
+const handler = pipeFlow(
+  addToStateOn("object", () => { shouldExecute: false }),
+  flowIf(
+      (context) => context.state.shouldExecute,
+      (context) => {
+        context.return = { hasExecuted: true };
+      }
+    )
+)();
+
+const result = handler(() => { id: 9 });
+console(result) // undefined
 ```
 
 
