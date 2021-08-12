@@ -60,36 +60,25 @@ const addToReturnOn = addToReturnOnFn;
 
 // - - - - -
 
-const addToStateFn = R.curry(
-  async <M extends Record<any, any> = Record<any, any>>(
-    immutable: boolean,
-    toState: () => M | Promise<M>,
-    context: FlowContext
-  ): Promise<FlowContext["state"] & M> =>
-    R.merge(
-      immutable ? readOnly(await toState()) : await toState(),
-      context.state
-    ) as FlowContext
-);
+const addToStateFn = <M extends Record<any, any>>(immutable: boolean) => (
+  toState: () => M | Promise<M>
+) => async (context: FlowContext): Promise<FlowContext["state"] & M> =>
+  R.merge(
+    immutable ? readOnly(await toState()) : await toState(),
+    context.state
+  ) as FlowContext;
 
-const addToStateOnFn = R.curry(
-  async <M extends Record<any, any> = Record<any, any>>(
-    immutable: boolean,
-    keyToAttachOn: string,
-    toState: () => M | Promise<M>,
-    context: FlowContext
-    // eslint-disable-next-line max-params
-  ): Promise<FlowContext["state"] & M> => {
-    const base = {};
+const addToStateOnFn = <M = unknown>(immutable: boolean) => (
+  keyToAttachOn: string,
+  toState: () => M | Promise<M>
+) => async (context: FlowContext): Promise<FlowContext["state"] & M> => {
+  const base = {};
 
-    // @ts-expect-error
-    base[keyToAttachOn] = immutable
-      ? readOnly(await toState())
-      : await toState();
+  // @ts-expect-error
+  base[keyToAttachOn] = immutable ? readOnly(await toState()) : await toState();
 
-    return R.merge(base, context.state) as FlowContext;
-  }
-);
+  return R.merge(base, context.state) as FlowContext;
+};
 
 /**
  * Little helper to merge some data in the state property of the context

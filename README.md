@@ -32,14 +32,14 @@ yarn add @bjmrq/pipe-flow
 ## Hello Word Example
 Javascript:
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   (context) => {
     const message = context.input.message // access the context
     context.return = message //control what you want to return
   }
-)();// This is for optional error handler
+)();// This is for optional error handling
 
-const result = handler({ message: "Hello world" }) // create context from data
+const result = flowWith({ message: "Hello world" }) // create context from data
 console.log(result) // "Hello world"
 ```
 Arity:
@@ -54,7 +54,7 @@ You can create a flow made of multiple functions that will execute one after an 
 Those function can either be sync or async functions.
 
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   (context) => {
     console.log(context.input) // {id: 9}
 
@@ -65,7 +65,7 @@ const handler = pipeFlow(
   }
 )();
 
-handler({ id: 9 });
+flowWith({ id: 9 });
 ```
 
 
@@ -74,7 +74,7 @@ handler({ id: 9 });
 If you want to move some data from one function to an other simply return it in an object. Any object you return from one of your function will be merge in the state key of the "context".
 
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   async (context) => {
     const product = await database("products").where(
       "id",
@@ -90,7 +90,7 @@ const handler = pipeFlow(
   }
 )();
 
-handler({ productId: 9 });
+flowWith({ productId: 9 });
 ```
 #### Those are the keys accessible inside the context:
 
@@ -106,7 +106,7 @@ You need to attach any data you wish to **return** to the return key of the "con
 If an error has happened during the flow it will be returned instead.
 
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   async (context) => {
     const product = await database("products").where(
       "id",
@@ -120,7 +120,7 @@ const handler = pipeFlow(
   }
 )();
 
-const result = handler({ productId: 9 })
+const result = flowWith({ productId: 9 })
 console.log(result) // { id: 9, name: "A great product indeed", type: "product",... }
 ```
 
@@ -129,7 +129,7 @@ console.log(result) // { id: 9, name: "A great product indeed", type: "product",
 You can use **subFlow** to branch different flow together subFlow receive an already built context and will be able to attache data to it's return and state property.
 
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   (context) => {
     console.log(context.input) // {id: 9}
 
@@ -145,7 +145,7 @@ const handler = pipeFlow(
   )
 )();
 
-const result = handler({ id: 9 });
+const result = flowWith({ id: 9 });
 console.log(result) // { status: "ok", subFlow: true }
 ```
 
@@ -159,7 +159,7 @@ This will skip the execution of all other functions in your flow.
 But if you forget to catch an error it will be attach to the "context" as well and returned as
 
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   async (context) => {
     const product = await database("products").where(
       "id",
@@ -299,7 +299,7 @@ exports.handler = pipeFlow(
     }
     
     context.return = product
-// Extra error handler
+// Extra error handling
 )((context) => {
   sendLogs(context.error)
 });
@@ -313,69 +313,71 @@ exports.handler = pipeFlow(
 - **debugFlow**: will help you debug the state of your context (optionally your can pass an array of string to retrieve the value at a given path)
 example:
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   (context) => {
     return { status: "ok" } // Attach data to the state
   },
   debugFlow() // { input: { id: 9 }, state: { status: "ok" }, error: undefined, return undefined}
 )();
 
-handler({ id: 9 });
+flowWith({ id: 9 });
 
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   (context) => {
     return { status: "ok" } // Attach data to the state
   },
   debugFlow(["state", "status"]) // "ok"
 )();
 
-handler({ id: 9 });
+flowWith({ id: 9 });
 ```
+
 
 - **addToReturn**: will add the return value of a given function to the return property of the context
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   addToReturn(() => { status: "ok" }),
 )();
 
-const result = handler(() => { id: 9 });
+const result = flowWith({ id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
+
 - **addToState**: will add the return value of a given function to the state property of the context
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   addToState(() => { status: "ok" }),
   (context) => {
     console.log(context.state) // { status: "ok" }
   }
 )();
 
-const result = handler(() => { id: 9 });
+const result = flowWith({ id: 9 });
 ```
 
 
 - **addToReturnOn**: will add the return value of a given function to the specified key to the return property of the context
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   addToReturnOn("status", () => "ok" ),
 )();
 
-const result = handler(() => { id: 9 });
+const result = flowWith({ id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
 
 - **addToStateOn**: will add the return value of a given function to the specified key to the state property of the context
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   addToStateOn("object", () => { status: "ok" }),
   (context) => {
     console.log(context.state) // { object: { status: "ok" }}
   }
 )();
 
-const result = handler(() => { id: 9 });
+const result = flowWith({ id: 9 });
 ```
 
 
@@ -385,7 +387,7 @@ const result = handler(() => { id: 9 });
 
 - **returnWith**: usually used at the end of the pipeFlow or subFlow, will return the given path from the context
 ```js
-const handler = pipeFlow(
+const flowWith = pipeFlow(
   addToStateOn("object", () => { status: "ok" }),
   (context) => {
     console.log(context.state) // { object: { status: "ok" }}
@@ -393,15 +395,15 @@ const handler = pipeFlow(
   returnWith(["state", "object", "status"])
 )();
 
-const result = handler(() => { id: 9 });
+const result = flowWith({ id: 9 });
 console.log(result) // "ok"
 ```
 
 
 - **flowIf**: Execute a given function of the flow only if the given predicate return true
 ```js
-const handler = pipeFlow(
-  addToStateOn("object", () => { shouldExecute: true }),
+const flowWith = pipeFlow(
+  addToStateOn("shouldExecute", () => true),
   flowIf(
       (context) => context.state.shouldExecute,
       (context) => {
@@ -410,12 +412,12 @@ const handler = pipeFlow(
     )
 )();
 
-const result = handler(() => { id: 9 });
-console(result) // { hasExecuted: true }
+const result = flowWith({ id: 9 });
+console.log(result) // { hasExecuted: true }
 ```
 ```js
-const handler = pipeFlow(
-  addToStateOn("object", () => { shouldExecute: false }),
+const flowWith = pipeFlow(
+  addToStateOn("shouldExecute", false}),
   flowIf(
       (context) => context.state.shouldExecute,
       (context) => {
@@ -424,8 +426,25 @@ const handler = pipeFlow(
     )
 )();
 
-const result = handler(() => { id: 9 });
-console(result) // undefined
+const result = flowWith({ id: 9 });
+console.log(result) // undefined
+```
+
+
+- **flowOn**: Execute a given function of the flow on a specific value from the context accessed by an array of keys
+```js
+const flowWith = pipeFlow(
+  addToStateOn("number", () => 1),
+  flowOn(["state", "number"],
+      (number) => ({
+        addedNumber: number + 1,
+      })
+    ),
+  returnWith(["state", "addedNumber"])
+)();
+
+const result = flowWith({ initialData: "woo" });
+console.log(result) // 2
 ```
 
 
