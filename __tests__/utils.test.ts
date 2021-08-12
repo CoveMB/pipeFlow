@@ -5,6 +5,7 @@ import {
   addToStateImmutableOn,
   addToStateOn,
   flowIf,
+  flowOn,
   pipeFlow,
   returnWith,
 } from "../src";
@@ -91,14 +92,13 @@ it("Data added with the immutable utility should be immutable", async () => {
       // @ts-expect-error
       console.log(Object.isFrozen(context.state.immutable));
       // @ts-expect-error
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       context.state.immutable.key = false;
     },
     (context) => {
       context.return = context.state;
     }
   )()(pipeContext);
-
-  console.log(returnedFromFlow);
 
   // @ts-ignore
   expect(returnedFromFlow.message).toBe(
@@ -119,26 +119,20 @@ it("Should not execute middleware if predicate is false", async () => {
     )
   )()(pipeContext);
 
-  console.log(returnedFromFlow);
-
   // @ts-ignore
   expect(returnedFromFlow.hasExecuted).toBe(true);
 });
 
-it("Should not execute middleware if predicate is false", async () => {
-  const extraData = { key: "test", value: true, object: { val: true } };
-
-  const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
-    addToStateImmutableOn("immutable", () => extraData),
-    flowIf(
-      (ignore) => false,
-      (context) => {
-        context.return = { hasExecuted: true };
-      }
-    )
+it("Should execute a given middleware fon a specific of the context", async () => {
+  const returnedFromFlow = await pipeFlow(
+    (ignore) => ({
+      number: 66,
+    }),
+    flowOn<number>(["state", "number"], (number) => ({
+      addedNumber: number + 1,
+    })),
+    returnWith(["state", "addedNumber"])
   )()(pipeContext);
 
-  console.log(returnedFromFlow);
-
-  expect(returnedFromFlow).toBe(undefined);
+  expect(returnedFromFlow).toBe(67);
 });

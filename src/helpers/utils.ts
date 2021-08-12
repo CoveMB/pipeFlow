@@ -148,7 +148,23 @@ const flowIfFn = <M extends FlowContext>(
  */
 const flowIf = flowIfFn;
 
+// - - - - -
+
+const flowOnFn = <M = any, Y = any>(
+  keyPathFromContext: [keyof FlowContext, ...string[]],
+  middlewareToExecutes: (contextValue: M) => Y
+): FlowMiddleware<FlowContext> => (context) =>
+  middlewareToExecutes(R.path(keyPathFromContext, context) as M);
+
+/**
+ * Execute a given function on a given path key from the context
+ * @param {[keyof FlowContext, ...string[]]} keyPathFromContext - path of to execute middleware on
+ * @param {FlowMiddleware} middlewareToExecutes - middleware to execute
+ */
+const flowOn = flowOnFn;
+
 export {
+  flowOn,
   flowIf,
   addToStateOn,
   addToReturnOn,

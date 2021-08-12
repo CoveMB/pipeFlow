@@ -89,9 +89,9 @@ const errorCallbackHandler: ErrorCallbackHandler = (errorCallback) => async (
  * @returns {Promise<FlowContext<M, Y, X>["return"]>} - The returned value from your R.pipe
  */
 const pipeFlow: PipeFlow = (...middlewares) => (errorCallback = R.identity) =>
-  // @ts-expect-error
   R.pipe(
     createContext,
+    // @ts-expect-error
     ...R.map(errorOut)(middlewares),
     errorCallbackHandler(errorCallback),
     returnData
@@ -104,8 +104,8 @@ const pipeFlow: PipeFlow = (...middlewares) => (errorCallback = R.identity) =>
  */
 const subFlow: SubFlow = (...middlewares) =>
   R.pipe(
-    ...R.map(errorOut)(middlewares),
     // @ts-expect-error
+    ...R.map(errorOut)(middlewares),
     async (context: Promise<FlowContext>) =>
       R.prop("state")(await context) as FlowContext
   );
