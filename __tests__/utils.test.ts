@@ -134,5 +134,22 @@ it("Should execute a given middleware fon a specific of the context", async () =
     returnWith(["state", "addedNumber"])
   )()(pipeContext);
 
+  pipeFlow(
+    // @ts-expect-error
+    addToStateOn("number", 1),
+    // @ts-expect-error
+    flowIf(
+      (context) => context.state.shouldExecute,
+      (context) => {
+        context.return = { hasExecuted: true };
+      }
+    )
+  )();
+
+  // @ts-expect-error
+  const result = handler(() => ({ number: 6 }));
+
+  console.log(result);
+
   expect(returnedFromFlow).toBe(67);
 });

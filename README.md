@@ -365,6 +365,7 @@ const result = handler(() => { id: 9 });
 console.log(result) // { status: "ok" }
 ```
 
+
 - **addToStateOn**: will add the return value of a given function to the specified key to the state property of the context
 ```js
 const handler = pipeFlow(
@@ -377,7 +378,9 @@ const handler = pipeFlow(
 const result = handler(() => { id: 9 });
 ```
 
+
 - **addToStateImmutableOn**: will add the return value of a given function to the specified key to the state property of the context, and make it read only
+
 
 
 - **returnWith**: usually used at the end of the pipeFlow or subFlow, will return the given path from the context
@@ -393,6 +396,7 @@ const handler = pipeFlow(
 const result = handler(() => { id: 9 });
 console.log(result) // "ok"
 ```
+
 
 - **flowIf**: Execute a given function of the flow only if the given predicate return true
 ```js
