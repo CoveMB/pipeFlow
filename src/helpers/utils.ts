@@ -18,7 +18,11 @@ const debugFlow: (
 
 // - - - -
 
-const addToReturnFn = R.curry(
+/**
+ * Little helper to merge some data in the return property of the context
+ * @param {() => any} toState - function to attach return value from
+ */
+const addToReturn = R.curry(
   async <M extends Record<any, any> = Record<any, any>>(
     toReturn: () => M | Promise<M>,
     context: FlowContext
@@ -29,7 +33,12 @@ const addToReturnFn = R.curry(
   }
 );
 
-const addToReturnOnFn = R.curry(
+/**
+ * Little helper to merge some data in the return property of the context
+ * @param {string} keyToAttachOn - key to attach value on the return
+ * @param {() => any} toState - function to attach return value from
+ */
+const addToReturnOn = R.curry(
   async <M extends Record<any, any> = Record<any, any>>(
     keyToAttachOn: string,
     toReturn: () => M | Promise<M>,
@@ -44,19 +53,6 @@ const addToReturnOnFn = R.curry(
     return undefined;
   }
 );
-
-/**
- * Little helper to merge some data in the return property of the context
- * @param {() => any} toState - function to attach return value from
- */
-const addToReturn = addToReturnFn;
-
-/**
- * Little helper to merge some data in the return property of the context
- * @param {string} keyToAttachOn - key to attach value on the return
- * @param {() => any} toState - function to attach return value from
- */
-const addToReturnOn = addToReturnOnFn;
 
 // - - - - -
 
@@ -127,7 +123,12 @@ const returnWith =
 
 // - - - - -
 
-const flowIfFn =
+/**
+ * Execute a given function of the flow only if the given predicate return true
+ * @param {(context: FlowContext) => boolean} predicateFn - predicate function
+ * @param {FlowMiddleware} whenTrueFn - function to invoke when the `condition` evaluates to a truthy value.
+ */
+const flowIf =
   <M extends FlowContext>(
     predicateFn: (context: M) => boolean,
     whenTrueMiddleware: FlowMiddleware<M>
@@ -135,16 +136,14 @@ const flowIfFn =
   (context: M) =>
     predicateFn(context) ? whenTrueMiddleware(context) : undefined;
 
-/**
- * Execute a given function of the flow only if the given predicate return true
- * @param {(context: FlowContext) => boolean} predicateFn - predicate function
- * @param {FlowMiddleware} whenTrueFn - function to invoke when the `condition` evaluates to a truthy value.
- */
-const flowIf = flowIfFn;
-
 // - - - - -
 
-const flowOnFn =
+/**
+ * Execute a given function on a given path key from the context
+ * @param {[keyof FlowContext, ...string[]]} keyPathFromContext - path of to execute middleware on
+ * @param {FlowMiddleware} middlewareToExecutes - middleware to execute
+ */
+const flowOn =
   <M = any, Y = any>(
     keyPathFromContext: [keyof FlowContext, ...string[]],
     middlewareToExecutes: (contextValue: M) => Y
@@ -152,26 +151,19 @@ const flowOnFn =
   (context) =>
     middlewareToExecutes(R.path(keyPathFromContext, context) as M);
 
-/**
- * Execute a given function on a given path key from the context
- * @param {[keyof FlowContext, ...string[]]} keyPathFromContext - path of to execute middleware on
- * @param {FlowMiddleware} middlewareToExecutes - middleware to execute
- */
-const flowOn = flowOnFn;
-
 // - - - - -
 
 /**
  * Execute a given function on a given path key from the context and attach it to the state on a given key
  * @param {[keyof FlowContext, ...string[]]} keyPathFromContext - path of to execute middleware on
- * @param {FlowMiddleware} middlewareToExecutes - middleware to execute
  * @param {string} keyToAttacheResultOn - key to attach middleware result on
+ * @param {FlowMiddleware} middlewareToExecutes - middleware to execute
  */
 const flowOnTo =
   <M = any, Y = any>(
     keyPathFromContext: [keyof FlowContext, ...string[]],
-    middlewareToExecutes: (contextValue: M) => Y | Promise<Y>,
-    keyToAttacheResultOn: string
+    keyToAttacheResultOn: string,
+    middlewareToExecutes: (contextValue: M) => Y | Promise<Y>
   ): FlowMiddleware<FlowContext> =>
   async (context) =>
     R.assoc(
