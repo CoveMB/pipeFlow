@@ -6,6 +6,7 @@ import {
   addToStateOn,
   flowIf,
   flowOn,
+  flowOnTo,
   pipeFlow,
   returnWith,
 } from "../src";
@@ -131,6 +132,22 @@ it("Should execute a given middleware fon a specific of the context", async () =
     flowOn<number>(["state", "number"], (number) => ({
       addedNumber: number + 1,
     })),
+    returnWith(["state", "addedNumber"])
+  )()(pipeContext);
+
+  expect(returnedFromFlow).toBe(67);
+});
+
+it("Should execute a given middleware fon a specific of the context", async () => {
+  const returnedFromFlow = await pipeFlow(
+    (ignore) => ({
+      number: 66,
+    }),
+    flowOnTo<number>(
+      ["state", "number"],
+      (number) => number + 1,
+      "addedNumber"
+    ),
     returnWith(["state", "addedNumber"])
   )()(pipeContext);
 

@@ -60,25 +60,28 @@ const addToReturnOn = addToReturnOnFn;
 
 // - - - - -
 
-const addToStateFn = <M extends Record<any, any>>(immutable: boolean) => (
-  toState: () => M | Promise<M>
-) => async (context: FlowContext): Promise<FlowContext["state"] & M> =>
-  R.merge(
-    immutable ? readOnly(await toState()) : await toState(),
-    context.state
-  ) as FlowContext;
+const addToStateFn =
+  <M extends Record<any, any>>(immutable: boolean) =>
+  (toState: () => M | Promise<M>) =>
+  async (context: FlowContext): Promise<FlowContext["state"] & M> =>
+    R.merge(
+      immutable ? readOnly(await toState()) : await toState(),
+      context.state
+    ) as FlowContext;
 
-const addToStateOnFn = <M = unknown>(immutable: boolean) => (
-  keyToAttachOn: string,
-  toState: () => M | Promise<M>
-) => async (context: FlowContext): Promise<FlowContext["state"] & M> => {
-  const base = {};
+const addToStateOnFn =
+  <M = unknown>(immutable: boolean) =>
+  (keyToAttachOn: string, toState: () => M | Promise<M>) =>
+  async (context: FlowContext): Promise<FlowContext["state"] & M> => {
+    const base = {};
 
-  // @ts-expect-error
-  base[keyToAttachOn] = immutable ? readOnly(await toState()) : await toState();
+    // @ts-expect-error
+    base[keyToAttachOn] = immutable
+      ? readOnly(await toState())
+      : await toState();
 
-  return R.merge(base, context.state) as FlowContext;
-};
+    return R.merge(base, context.state) as FlowContext;
+  };
 
 /**
  * Little helper to merge some data in the state property of the context
@@ -112,23 +115,25 @@ const addToStateImmutableOn = addToStateOnFn(true);
  * Little helper to simply return a path from the context
  * @param {string | number | Array<string | number>} pathToReturn - key to attach value on the state
  */
-const returnWith = (pathToReturn: string | number | Array<string | number>) => (
-  context: FlowContext
-) => {
-  context.return = R.path(
-    // eslint-disable-next-line array-func/prefer-array-from
-    [...(Array.isArray(pathToReturn) ? pathToReturn : [pathToReturn])],
-    context
-  );
-};
+const returnWith =
+  (pathToReturn: string | number | Array<string | number>) =>
+  (context: FlowContext) => {
+    context.return = R.path(
+      // eslint-disable-next-line array-func/prefer-array-from
+      [...(Array.isArray(pathToReturn) ? pathToReturn : [pathToReturn])],
+      context
+    );
+  };
 
 // - - - - -
 
-const flowIfFn = <M extends FlowContext>(
-  predicateFn: (context: M) => boolean,
-  whenTrueMiddleware: FlowMiddleware<M>
-) => (context: M) =>
-  predicateFn(context) ? whenTrueMiddleware(context) : undefined;
+const flowIfFn =
+  <M extends FlowContext>(
+    predicateFn: (context: M) => boolean,
+    whenTrueMiddleware: FlowMiddleware<M>
+  ) =>
+  (context: M) =>
+    predicateFn(context) ? whenTrueMiddleware(context) : undefined;
 
 /**
  * Execute a given function of the flow only if the given predicate return true
@@ -139,11 +144,13 @@ const flowIf = flowIfFn;
 
 // - - - - -
 
-const flowOnFn = <M = any, Y = any>(
-  keyPathFromContext: [keyof FlowContext, ...string[]],
-  middlewareToExecutes: (contextValue: M) => Y
-): FlowMiddleware<FlowContext> => (context) =>
-  middlewareToExecutes(R.path(keyPathFromContext, context) as M);
+const flowOnFn =
+  <M = any, Y = any>(
+    keyPathFromContext: [keyof FlowContext, ...string[]],
+    middlewareToExecutes: (contextValue: M) => Y
+  ): FlowMiddleware<FlowContext> =>
+  (context) =>
+    middlewareToExecutes(R.path(keyPathFromContext, context) as M);
 
 /**
  * Execute a given function on a given path key from the context
@@ -152,7 +159,29 @@ const flowOnFn = <M = any, Y = any>(
  */
 const flowOn = flowOnFn;
 
+// - - - - -
+
+/**
+ * Execute a given function on a given path key from the context and attach it to the state on a given key
+ * @param {[keyof FlowContext, ...string[]]} keyPathFromContext - path of to execute middleware on
+ * @param {FlowMiddleware} middlewareToExecutes - middleware to execute
+ * @param {string} keyToAttacheResultOn - key to attach middleware result on
+ */
+const flowOnTo =
+  <M = any, Y = any>(
+    keyPathFromContext: [keyof FlowContext, ...string[]],
+    middlewareToExecutes: (contextValue: M) => Y | Promise<Y>,
+    keyToAttacheResultOn: string
+  ): FlowMiddleware<FlowContext> =>
+  async (context) =>
+    R.assoc(
+      keyToAttacheResultOn,
+      await middlewareToExecutes(R.path(keyPathFromContext, context) as M),
+      {}
+    );
+
 export {
+  flowOnTo,
   flowOn,
   flowIf,
   addToStateOn,

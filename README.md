@@ -447,6 +447,21 @@ const result = flowWith({ initialData: "woo" });
 console.log(result) // 2
 ```
 
+- **flowOnTo**: Execute a given function of the flow on a specific value from the context accessed by an array of keys and and attach it to the state on a given key
+```js
+const flowWith = pipeFlow(
+  addToStateOn("number", () => 1),
+  flowOn(["state", "number"],
+      (number) => number + 1,
+      "addedNumber"
+    ),
+  returnWith(["state", "addedNumber"])
+)();
+
+const result = flowWith({ initialData: "woo" });
+console.log(result) // 2
+```
+
 
 ## The Flow and it's Context Recap
 
