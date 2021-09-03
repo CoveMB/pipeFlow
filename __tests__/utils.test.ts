@@ -145,8 +145,8 @@ it("Should execute a given middleware fon a specific of the context", async () =
     }),
     flowOnTo<number>(
       ["state", "number"],
-      (number) => number + 1,
-      "addedNumber"
+      "addedNumber",
+      (number) => number + 1
     ),
     returnWith(["state", "addedNumber"])
   )()(pipeContext);

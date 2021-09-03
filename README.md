@@ -453,8 +453,8 @@ const flowWith = pipeFlow(
   addToStateOn("number", () => 1),
   flowOn(
     ["state", "number"],
+    "addedNumber",
     (number) => number + 1,
-    "addedNumber"
   ),
   returnWith(["state", "addedNumber"])
 )();
