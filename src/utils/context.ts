@@ -7,7 +7,8 @@ const addToProperty = R.curry(
     property: keyof FlowContext,
     toReturn: M,
     context: FlowContext
-  ): FlowContext[typeof property] & M => R.merge(toReturn, context[property])
+  ): FlowContext[typeof property] & M =>
+    R.mergeRight(toReturn, context[property])
 );
 
 export { addToProperty };

@@ -35,27 +35,25 @@ const returnData = async (context: Promise<FlowContext>) =>
   )(await context);
 
 // @internal
-const updateContextState = (middleware: FlowMiddleware) => async (
-  context: FlowContext
-) =>
-  R.assoc(
-    "state",
-    // eslint-disable-next-line @typescript-eslint/await-thenable
-    R.merge(context.state, (await middleware(context)) as ToState),
-    context
-  );
+const updateContextState =
+  (middleware: FlowMiddleware) => async (context: FlowContext) =>
+    R.assoc(
+      "state",
+      // eslint-disable-next-line @typescript-eslint/await-thenable
+      R.mergeRight(context.state, (await middleware(context)) as ToState),
+      context
+    );
 
 // @internal
-const notCatchedErrors = (middleware: FlowMiddleware) => (
-  error: Error,
-  errorContext: FlowContextWithError
-) =>
-  R.pipe(
-    // @ts-expect-error
-    R.assoc("error", enhancedErrors(middleware)(error)),
-    R.tap(logError)
-    // @ts-expect-error
-  )(errorContext);
+const notCatchedErrors =
+  (middleware: FlowMiddleware) =>
+  (error: Error, errorContext: FlowContextWithError) =>
+    R.pipe(
+      // @ts-expect-error
+      R.assoc("error", enhancedErrors(middleware)(error)),
+      R.tap(logError)
+      // @ts-expect-error
+    )(errorContext);
 
 // @internal
 const errorOut: ErrorOut = (middleware) => async (context) =>
@@ -72,30 +70,31 @@ const errorOut: ErrorOut = (middleware) => async (context) =>
   )(await context);
 
 // @internal
-const errorCallbackHandler: ErrorCallbackHandler = (errorCallback) => async (
-  context
-) =>
-  // @ts-expect-error
-  R.when(
+const errorCallbackHandler: ErrorCallbackHandler =
+  (errorCallback) => async (context) =>
     // @ts-expect-error
-    R.pipe(R.prop("error"), R.is(Object)),
-    R.pipe(R.clone, errorCallback, R.always(await context))
-    // @ts-expect-error
-  )(await context);
+    R.when(
+      // @ts-expect-error
+      R.pipe(R.prop("error"), R.is(Object)),
+      R.pipe(R.clone, errorCallback, R.always(await context))
+      // @ts-expect-error
+    )(await context);
 
 /**
  * Will process your data encapsulated in a "context" through your middlewares and then return it's response
  * @param {Array<FlowMiddleware<M>>} ...middlewares - All the middleware that will process your "context"
  * @returns {Promise<FlowContext<M, Y, X>["return"]>} - The returned value from your R.pipe
  */
-const pipeFlow: PipeFlow = (...middlewares) => (errorCallback = R.identity) =>
-  R.pipe(
-    createContext,
-    // @ts-expect-error
-    ...R.map(errorOut)(middlewares),
-    errorCallbackHandler(errorCallback),
-    returnData
-  );
+const pipeFlow: PipeFlow =
+  (...middlewares) =>
+  (errorCallback = R.identity) =>
+    R.pipe(
+      createContext,
+      // @ts-expect-error
+      ...R.map(errorOut)(middlewares),
+      errorCallbackHandler(errorCallback),
+      returnData
+    );
 
 /**
  * A sub routine to use with pipeFlow that will pass the "context" of pipeFlow through your functions
