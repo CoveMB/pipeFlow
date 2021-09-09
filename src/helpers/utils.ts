@@ -22,59 +22,65 @@ const debugFlow: (
  * Little helper to merge some data in the return property of the context
  * @param {() => any} toState - function to attach return value from
  */
-const addToReturn = R.curry(
-  async <M extends Record<any, any> = Record<any, any>>(
-    toReturn: () => M | Promise<M>,
-    context: FlowContext
-  ): Promise<FlowContext["return"] & M> => {
-    context.return = R.merge(await toReturn(), context.return);
+const addToReturn =
+  <
+    T extends FlowContext = FlowContext,
+    M extends Record<any, any> = Record<any, any>
+  >(
+    toReturn: (context: T) => M | Promise<M>
+  ) =>
+  async (context: T): Promise<FlowContext["return"] & M> => {
+    context.return = R.merge(await toReturn(context), context.return);
 
     return undefined;
-  }
-);
+  };
 
 /**
  * Little helper to merge some data in the return property of the context
  * @param {string} keyToAttachOn - key to attach value on the return
  * @param {() => any} toState - function to attach return value from
  */
-const addToReturnOn = R.curry(
-  async <M extends Record<any, any> = Record<any, any>>(
+const addToReturnOn =
+  <T extends FlowContext = FlowContext, M = any>(
     keyToAttachOn: string,
-    toReturn: () => M | Promise<M>,
-    context: FlowContext
-  ): Promise<FlowContext["return"] & M> => {
+    toReturn: (context: T) => M | Promise<M>
+  ) =>
+  async (context: T): Promise<FlowContext["return"] & M> => {
     const base = {};
 
     // @ts-expect-error
-    base[keyToAttachOn] = await toReturn();
+    base[keyToAttachOn] = await toReturn(context);
     context.return = R.merge(base, context.return);
 
     return undefined;
-  }
-);
+  };
 
 // - - - - -
 
 const addToStateFn =
-  <M extends Record<any, any>>(immutable: boolean) =>
-  (toState: () => M | Promise<M>) =>
-  async (context: FlowContext): Promise<FlowContext["state"] & M> =>
+  <
+    T extends FlowContext = FlowContext,
+    M extends Record<any, any> = Record<any, any>
+  >(
+    immutable: boolean
+  ) =>
+  (toState: (context: T) => M | Promise<M>) =>
+  async (context: T): Promise<FlowContext["state"] & M> =>
     R.merge(
-      immutable ? readOnly(await toState()) : await toState(),
+      immutable ? readOnly(await toState(context)) : await toState(context),
       context.state
-    ) as FlowContext;
+    ) as T;
 
 const addToStateOnFn =
-  <M = unknown>(immutable: boolean) =>
-  (keyToAttachOn: string, toState: () => M | Promise<M>) =>
-  async (context: FlowContext): Promise<FlowContext["state"] & M> => {
+  <T extends FlowContext = FlowContext, M = any>(immutable: boolean) =>
+  (keyToAttachOn: string, toState: (context: T) => M | Promise<M>) =>
+  async (context: T): Promise<FlowContext["state"] & M> => {
     const base = {};
 
     // @ts-expect-error
     base[keyToAttachOn] = immutable
-      ? readOnly(await toState())
-      : await toState();
+      ? readOnly(await toState(context))
+      : await toState(context);
 
     return R.merge(base, context.state) as FlowContext;
   };
@@ -83,14 +89,22 @@ const addToStateOnFn =
  * Little helper to merge some data in the state property of the context
  * @param {() => any} toState - function to attach return value from
  */
-const addToState = addToStateFn(false);
+const addToState: <
+  T extends FlowContext = FlowContext,
+  M extends Record<any, any> = Record<any, any>
+>(
+  toState: (context: T) => M | Promise<M>
+) => (context: T) => Promise<FlowContext["state"] & M> = addToStateFn(false);
 
 /**
  * Little helper to merge some data in the state property of the context
  * @param {string} keyToAttachOn - key to attach value on the state
  * @param {() => any} toState - function to attach return value from
  */
-const addToStateOn = addToStateOnFn(false);
+const addToStateOn: <T extends FlowContext = FlowContext, M = any>(
+  keyToAttachOn: string,
+  toState: (context: T) => M | Promise<M>
+) => (context: T) => Promise<FlowContext["state"] & M> = addToStateOnFn(false);
 
 // /**
 //  * Little helper to merge some data in the state property of the context
@@ -103,7 +117,10 @@ const addToStateOn = addToStateOnFn(false);
  * @param {string} keyToAttachOn - key to attach value on the state
  * @param {() => any} toState - function to attach return value from
  */
-const addToStateImmutableOn = addToStateOnFn(true);
+const addToStateImmutableOn: <T extends FlowContext = FlowContext, M = any>(
+  keyToAttachOn: string,
+  toState: (context: T) => M | Promise<M>
+) => (context: T) => Promise<FlowContext["state"] & M> = addToStateOnFn(true);
 
 // - - - - -
 

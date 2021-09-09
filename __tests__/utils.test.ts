@@ -22,6 +22,18 @@ it("Should add data to the return property of the context", async () => {
   expect(JSON.stringify(returnedFromFlow)).toBe(JSON.stringify(extraData));
 });
 
+it("Should add data to the return property of the context using state from context", async () => {
+  const returnedFromFlow = await pipeFlow<typeof pipeContext>(
+    addToReturn((context) => ({
+      id: context.input.userId,
+    }))
+  )()(pipeContext);
+
+  expect(JSON.stringify(returnedFromFlow)).toBe(
+    JSON.stringify({ id: pipeContext.userId })
+  );
+});
+
 it("Should add data to the return property of the context on a certain property", async () => {
   const extraData = { key: "test", value: true };
 
@@ -31,6 +43,16 @@ it("Should add data to the return property of the context on a certain property"
 
   expect(JSON.stringify(returnedFromFlow)).toBe(
     JSON.stringify({ object: extraData })
+  );
+});
+
+it("Should add data to the return property of the context on a certain property using context property", async () => {
+  const returnedFromFlow = await pipeFlow<typeof pipeContext>(
+    addToReturnOn("id", (context) => context.input.userId)
+  )()(pipeContext);
+
+  expect(JSON.stringify(returnedFromFlow)).toBe(
+    JSON.stringify({ id: pipeContext.userId })
   );
 });
 
@@ -45,6 +67,19 @@ it("Should add data to the state property of the context", async () => {
   )()(pipeContext);
 
   expect(JSON.stringify(returnedFromFlow)).toBe(JSON.stringify(extraData));
+});
+
+it("Should add data to the state property of the context using context", async () => {
+  const returnedFromFlow = await pipeFlow<typeof pipeContext>(
+    addToState((context) => ({ id: context.input.userId })),
+    (context) => {
+      context.return = context.state;
+    }
+  )()(pipeContext);
+
+  expect(JSON.stringify(returnedFromFlow)).toBe(
+    JSON.stringify({ id: pipeContext.userId })
+  );
 });
 
 it("Should add data to the state property of the context on a certain property", async () => {
@@ -71,6 +106,17 @@ it("Should return the data in the given path if path is string", async () => {
   )()(pipeContext);
 
   expect(JSON.stringify(returnedFromFlow)).toBe(JSON.stringify(extraData));
+});
+
+it("Should return the data in the given path if path is string using context", async () => {
+  const returnedFromFlow = await pipeFlow<typeof pipeContext>(
+    addToState((context) => ({ id: context.input.userId })),
+    returnWith("state")
+  )()(pipeContext);
+
+  expect(JSON.stringify(returnedFromFlow)).toBe(
+    JSON.stringify({ id: pipeContext.userId })
+  );
 });
 
 it("Should return the data in the given path if path is array", async () => {
@@ -122,6 +168,19 @@ it("Should not execute middleware if predicate is false", async () => {
 
   // @ts-ignore
   expect(returnedFromFlow.hasExecuted).toBe(true);
+});
+
+it("Should not execute middleware if predicate is false using context", async () => {
+  const extraData = { key: "test", value: true, object: { val: true } };
+
+  const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
+    addToStateImmutableOn("immutable", (context) => context.input.userId),
+    returnWith(["state"])
+  )()(pipeContext);
+
+  expect(JSON.stringify(returnedFromFlow)).toBe(
+    JSON.stringify({ immutable: pipeContext.userId })
+  );
 });
 
 it("Should execute a given middleware fon a specific of the context", async () => {

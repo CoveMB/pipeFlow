@@ -451,7 +451,7 @@ console.log(result) // 2
 ```js
 const flowWith = pipeFlow(
   addToStateOn("number", () => 1),
-  flowOn(
+  flowOnTo(
     ["state", "number"],
     "addedNumber",
     (number) => number + 1,

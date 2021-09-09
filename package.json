@@ -1,6 +1,6 @@
 {
   "name": "@bjmrq/pipe-flow",
-  "version": "0.0.30",
+  "version": "0.0.40",
   "description": "A little utility to flow data in a pipe",
   "author": "Benjamin Marquis",
   "license": "ISC",
