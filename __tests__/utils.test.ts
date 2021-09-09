@@ -5,6 +5,7 @@ import {
   addToStateImmutableOn,
   addToStateOn,
   flowIf,
+  flowIfElse,
   flowOn,
   flowOnTo,
   pipeFlow,
@@ -170,7 +171,47 @@ it("Should not execute middleware if predicate is false", async () => {
   expect(returnedFromFlow.hasExecuted).toBe(true);
 });
 
-it("Should not execute middleware if predicate is false using context", async () => {
+it("Should execute tifTrue middleware if predicate is true", async () => {
+  const extraData = { key: "test", value: true, object: { val: true } };
+
+  const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
+    addToStateImmutableOn("immutable", () => extraData),
+    flowIfElse(
+      () => true,
+      (context) => {
+        context.return = { middlewareExecuted: "True" };
+      },
+      (context) => {
+        context.return = { middlewareExecuted: "False" };
+      }
+    )
+  )()(pipeContext);
+
+  // @ts-ignore
+  expect(returnedFromFlow.middlewareExecuted).toBe("True");
+});
+
+it("Should execute ifFalse middleware if predicate is false", async () => {
+  const extraData = { key: "test", value: true, object: { val: true } };
+
+  const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
+    addToStateImmutableOn("immutable", () => extraData),
+    flowIfElse(
+      () => false,
+      (context) => {
+        context.return = { middlewareExecuted: "True" };
+      },
+      (context) => {
+        context.return = { middlewareExecuted: "False" };
+      }
+    )
+  )()(pipeContext);
+
+  // @ts-ignore
+  expect(returnedFromFlow.middlewareExecuted).toBe("False");
+});
+
+it("Data added with the immutable utility should be immutable using context", async () => {
   const extraData = { key: "test", value: true, object: { val: true } };
 
   const returnedFromFlow = await pipeFlow<typeof pipeContext, typeof extraData>(
@@ -183,7 +224,7 @@ it("Should not execute middleware if predicate is false using context", async ()
   );
 });
 
-it("Should execute a given middleware fon a specific of the context", async () => {
+it("Should execute a given middleware function a specific of the context", async () => {
   const returnedFromFlow = await pipeFlow(
     (ignore) => ({
       number: 66,

@@ -17,7 +17,7 @@ In the "context" their is also a return entry so you can control what you wish t
 You will also find some little helpers to help you with error handling.
 
 And some utilities like: 
-debugFlow / flowIf / addToState / addToStateOn / addToReturn / addToReturnOn / returnWith
+debugFlow / flowIf / flowIfElse /addToState / addToStateOn / addToReturn / addToReturnOn / returnWith
 
 ## Installation
 With npm:
@@ -336,20 +336,20 @@ flowWith({ id: 9 });
 - **addToReturn**: will add the return value of a given function to the return property of the context
 ```js
 const flowWith = pipeFlow(
-  addToReturn(() => { status: "ok" }),
+  addToReturn((context) => { userId: context.input.id }),
 )();
 
 const result = flowWith({ id: 9 });
-console.log(result) // { status: "ok" }
+console.log(result) // { userId: 9 }
 ```
 
 
 - **addToState**: will add the return value of a given function to the state property of the context
 ```js
 const flowWith = pipeFlow(
-  addToState(() => { status: "ok" }),
+  addToState((context) => { userId: context.input.id }),
   (context) => {
-    console.log(context.state) // { status: "ok" }
+    console.log(context.state) // { userId: 9 }
   }
 )();
 
@@ -360,20 +360,20 @@ const result = flowWith({ id: 9 });
 - **addToReturnOn**: will add the return value of a given function to the specified key to the return property of the context
 ```js
 const flowWith = pipeFlow(
-  addToReturnOn("status", () => "ok" ),
+  addToReturnOn("userId", (context) => context.input.id ),
 )();
 
 const result = flowWith({ id: 9 });
-console.log(result) // { status: "ok" }
+console.log(result) // { userId: 9 }
 ```
 
 
 - **addToStateOn**: will add the return value of a given function to the specified key to the state property of the context
 ```js
 const flowWith = pipeFlow(
-  addToStateOn("object", () => { status: "ok" }),
+  addToStateOn("user", (context) => { userId: context.input.id }),
   (context) => {
-    console.log(context.state) // { object: { status: "ok" }}
+    console.log(context.state) // { user: { userId: 9 }}
   }
 )();
 
@@ -388,15 +388,15 @@ const result = flowWith({ id: 9 });
 - **returnWith**: usually used at the end of the pipeFlow or subFlow, will return the given path from the context
 ```js
 const flowWith = pipeFlow(
-  addToStateOn("object", () => { status: "ok" }),
+  addToStateOn("user", (context) => { userId: context.input.id }),
   (context) => {
-    console.log(context.state) // { object: { status: "ok" }}
+    console.log(context.state) // { user: { userId: 9 }}
   },
-  returnWith(["state", "object", "status"])
+  returnWith(["state", "object", "userId"])
 )();
 
 const result = flowWith({ id: 9 });
-console.log(result) // "ok"
+console.log(result) // 9
 ```
 
 

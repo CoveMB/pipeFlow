@@ -66,10 +66,10 @@ const addToStateFn =
   ) =>
   (toState: (context: T) => M | Promise<M>) =>
   async (context: T): Promise<M & T["state"]> =>
-    R.mergeRight(
+    R.mergeRight<M, M & T["state"]>(
       immutable ? readOnly(await toState(context)) : await toState(context),
       context.state
-    ) as M & T["state"];
+    );
 
 const addToStateOnFn =
   <T extends FlowContext = FlowContext, M = any>(immutable: boolean) =>
@@ -82,7 +82,10 @@ const addToStateOnFn =
       ? readOnly(await toState(context))
       : await toState(context);
 
-    return R.mergeRight(base, context.state) as Record<string, M> & T["state"];
+    return R.mergeRight<Record<string, M>, Record<string, M> & T["state"]>(
+      base,
+      context.state
+    );
   };
 
 /**
@@ -145,7 +148,7 @@ const returnWith =
 /**
  * Execute a given function of the flow only if the given predicate return true
  * @param {(context: FlowContext) => boolean} predicateFn - predicate function
- * @param {FlowMiddleware} whenTrueFn - function to invoke when the `condition` evaluates to a truthy value.
+ * @param {FlowMiddleware} whenTrueMiddleware - function to invoke when the `condition` evaluates to a truthy value.
  */
 const flowIf =
   <M extends FlowContext>(
@@ -154,6 +157,26 @@ const flowIf =
   ) =>
   (context: M) =>
     predicateFn(context) ? whenTrueMiddleware(context) : undefined;
+
+// - - - - -
+
+/**
+ * Given a predicate function execute either whenTrueMiddleware or whenFalseMiddleware depending of predicate function return value
+ * @param {(context: FlowContext) => boolean} predicateFn - predicate function
+ * @param {FlowMiddleware} whenTrueMiddleware - function to invoke when the `condition` evaluates to a truthy value.
+ * @param {FlowMiddleware} whenFalseMiddleware - function to invoke when the `condition` evaluates to a falsy value.
+
+ */
+const flowIfElse =
+  <M extends FlowContext>(
+    predicateFn: (context: M) => boolean,
+    whenTrueMiddleware: FlowMiddleware<M>,
+    whenFalseMiddleware: FlowMiddleware<M>
+  ) =>
+  (context: M) =>
+    predicateFn(context)
+      ? whenTrueMiddleware(context)
+      : whenFalseMiddleware(context);
 
 // - - - - -
 
@@ -192,6 +215,7 @@ const flowOnTo =
     );
 
 export {
+  flowIfElse,
   flowOnTo,
   flowOn,
   flowIf,
