@@ -66,7 +66,7 @@ const addToStateFn =
   ) =>
   (toState: (context: T) => M | Promise<M>) =>
   async (context: T): Promise<M & T["state"]> =>
-    R.mergeDeepRight(
+    R.mergeRight(
       immutable ? readOnly(await toState(context)) : await toState(context),
       context.state
     ) as M & T["state"];
