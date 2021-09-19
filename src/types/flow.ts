@@ -2,15 +2,15 @@ import { FlowContext } from "./context";
 import { ErrorCallback } from "./error";
 import { FlowMiddleware } from "./middleware";
 
-export type SubFlow = <M = unknown, Y = unknown>(
-  ...middlewares: Array<FlowMiddleware<FlowContext<M, Y>>>
-) => FlowMiddleware<FlowContext<M, Y>>;
+export type SubFlow = <TInput = unknown, TState = unknown>(
+  ...middlewares: Array<FlowMiddleware<FlowContext<TInput, TState>>>
+) => FlowMiddleware<FlowContext<TInput, TState>>;
 
-export type PipeFlow = <M = unknown, Y = unknown, X = unknown>(
-  ...middlewares: Array<FlowMiddleware<FlowContext<M, Y>>>
+export type PipeFlow = <TInput = unknown, TState = unknown, TReturn = unknown>(
+  ...middlewares: Array<FlowMiddleware<FlowContext<TInput, TState>>>
 ) => (
-  errorCallback?: ErrorCallback<FlowContext<M, Y>>
+  errorCallback?: ErrorCallback<FlowContext<TInput, TState>>
 ) => (
-  toContext: M
-) => Promise<FlowContext<M, Y, X>["return"]> &
-  Promise<FlowContext<M, Y, X>["error"]>;
+  toContext: TInput
+) => Promise<FlowContext<TInput, TState, TReturn>["return"]> &
+  Promise<FlowContext<TInput, TState, TReturn>["error"]>;

@@ -11,9 +11,9 @@ export type ErrorBuilder = (
 ) => (message?: string | Error) => FlowError;
 
 export type ErrorCallback<
-  M extends FlowContext = FlowContext,
-  X extends FlowError = FlowError
-> = (context: FlowContextWithError<M, X>) => void;
+  TContext extends FlowContext = FlowContext,
+  TError extends FlowError = FlowError
+> = (context: FlowContextWithError<TContext, TError>) => void;
 
 // @internal
 export type ErrorCallbackHandler = (

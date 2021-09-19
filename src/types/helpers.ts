@@ -10,6 +10,6 @@ import { FlowMiddleware } from "./middleware";
 // ) => (context: Promise<FlowContext<M>>) => Promise<FlowContext<M>>;
 
 // @internal
-export type ErrorOut = <M extends FlowMiddleware>(
-  middleware: M
+export type ErrorOut = <TMiddleware extends FlowMiddleware>(
+  middleware: TMiddleware
 ) => (context: Promise<FlowContext>) => Promise<FlowContext>;

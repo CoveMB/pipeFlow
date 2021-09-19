@@ -1,4 +1,6 @@
 import { FlowContext } from "./context";
 
 // @internal
-export type CreateContext = <M>(context: M) => Partial<FlowContext<M>>;
+export type CreateContext = <TContext>(
+  context: TContext
+) => Partial<FlowContext<TContext>>;
